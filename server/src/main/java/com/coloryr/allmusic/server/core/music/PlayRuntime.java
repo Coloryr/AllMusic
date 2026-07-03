@@ -223,10 +223,10 @@ public class PlayRuntime {
                         continue;
                     }
 
-                    if (PlayMusic.nowPlayMusic.getPlayerUrl() == null)
-                        PlayMusic.lyric = api.getLyric(PlayMusic.nowPlayMusic.getID());
-                    else
+                    PlayMusic.lyric = api.getLyric(PlayMusic.nowPlayMusic.getID());
+                    if (PlayMusic.lyric == null) {
                         PlayMusic.lyric = new LyricSave();
+                    }
 
                     if (PlayMusic.nowPlayMusic.getLength() != 0) {
                         PlayMusic.musicAllTime = PlayMusic.musicLessTime = PlayMusic.nowPlayMusic.getLength() + AllMusic.getConfig().fixSongTime;

@@ -266,6 +266,18 @@ public class PlayMusic {
                 }
                 return;
             }
+            // 预检查歌曲是否可播放
+            if (info.getPlayerUrl() == null) {
+                String playUrl = api.getPlayUrl(id);
+                if (playUrl == null) {
+                    if (sender != null) {
+                        String data = AllMusic.getMessage().musicPlay.emptyCanPlay;
+                        AllMusic.side.sendMessageTask(sender, data.replace(ARG.musicId, id));
+                    }
+                    return;
+                }
+                info.setPlayerUrl(playUrl);
+            }
             LimitObj limit = AllMusic.getConfig().limit;
             if (limit.musicTimeLimit && info.getLength() / 1000 > limit.maxMusicTime) {
                 if (sender != null) {
@@ -304,6 +316,10 @@ public class PlayMusic {
         } catch (Exception e) {
             if (isList) {
                 error++;
+            }
+            if (sender != null) {
+                String data = AllMusic.getMessage().musicPlay.emptyCanPlay;
+                AllMusic.side.sendMessageTask(sender, data.replace(ARG.musicId, id));
             }
             AllMusic.log.data("<light_purple>[AllMusic]<red>歌曲信息解析错误");
             e.printStackTrace();

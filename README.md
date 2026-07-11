@@ -2,7 +2,7 @@
 
 ![AllMusic](https://socialify.git.ci/Coloryr/AllMusic/image?description=1&font=Inter&forks=1&logo=https%3A%2F%2Fgithub.com%2FColoryr%2FAllMusic%2Fblob%2Fmain%2Fserver%2Fneoforge_26_1%2Fsrc%2Fmain%2Fresources%2Ficon.png%3Fraw%3Dtrue&name=1&owner=1&pattern=Signal&stargazers=1&theme=Auto)
 
-![](https://img.shields.io/badge/Version-3.1.4-blue?style=for-the-badge)
+![](https://img.shields.io/badge/Version-4.0.3-blue?style=for-the-badge)
 ![](https://img.shields.io/github/actions/workflow/status/Coloryr/AllMusic/gradle.yml?style=for-the-badge)
 ![](https://img.shields.io/github/license/Coloryr/AllMusic?style=for-the-badge)
 

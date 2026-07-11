@@ -96,6 +96,10 @@ public class SongInfoObj {
         return playerUrl;
     }
 
+    public void setPlayerUrl(String playerUrl) {
+        this.playerUrl = playerUrl;
+    }
+
     public String getAl() {
         return al == null ? "" : al;
     }

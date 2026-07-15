@@ -11,27 +11,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoreRenderTarget extends TextFrameBuffer {
-    private static class TextEntry {
-        final String text;
-        final int y;
-        final int color;
-        final boolean shadow;
-        final int width;
-        final int height;
-
-        TextEntry(String text, int y, int color, boolean shadow, int width, int height) {
-            this.text = text;
-            this.y = y;
-            this.color = color;
-            this.shadow = shadow;
-            this.width = width;
-            this.height = height;
-        }
-    }
-
-    private final List<TextEntry> entries = new ArrayList<>();
-
+public class CoreRenderTarget extends TextFrameBuffer<String> {
     private final boolean isState;
 
     public CoreRenderTarget(String name) {
@@ -39,25 +19,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
     }
 
     @Override
-    public void resize(int width, int height) {
-        nowWidth = width;
-        nowHeight = height;
-    }
-
-    @Override
-    public void use() {
-        isDraw = true;
-        clear();
-        entries.clear();
-    }
-
-    @Override
-    public void unUse() {
-        isDraw = false;
-    }
-
-    @Override
-    public void drawText(String text, int y, int color, boolean shadow) {
+    public void putText(String text, int y, int color, boolean shadow) {
         color = (color & 0x00FFFFFF) | 0xFF000000;
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;
         int width = font.getStringWidth(text);
@@ -69,8 +31,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (isState) {
             y = 0;
         }
-        entries.add(new TextEntry(text, y, color, shadow, width, height));
-        texts.add(new TextItem(width, height, y, 1.0f));
+        texts.add(new TextItem<>(width, height, y, text, shadow, color));
     }
 
     @Override
@@ -81,7 +42,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
 
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;
 
-        for (TextEntry entry : entries) {
+        for (TextItem<String> entry : texts) {
             int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
             Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
 
@@ -116,8 +77,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (line >= texts.size()) {
             return;
         }
-        if (line >= entries.size()) return;
-        TextEntry entry = entries.get(line);
+        TextItem<String> entry = texts.get(line);
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;
         GL11.glPushMatrix();
         GL11.glTranslatef((float) x, (float) (y + entry.y), 0);
@@ -132,7 +92,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         }
         FontRenderer font = Minecraft.getMinecraft().fontRenderer;
 
-        for (TextEntry entry : entries) {
+        for (TextItem<String> entry : texts) {
             int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
             Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
 
@@ -148,7 +108,6 @@ public class CoreRenderTarget extends TextFrameBuffer {
                 float texOffset = maxOffset * state;
                 int revealWidth = (int) (maxWidth * state);
 
-                enableScissor(drawX, drawY, maxWidth, entry.height);
                 enableScissor(drawX, drawY, revealWidth, entry.height);
                 drawString(font, entry, -(int) texOffset, 0, finalColor);
                 disableScissor();
@@ -168,16 +127,15 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (line >= texts.size()) {
             return new Point2f(0, 0);
         }
-        if (line >= entries.size()) return new Point2f(0, 0);
-        TextEntry entry = entries.get(line);
+        TextItem<String> entry = texts.get(line);
         return new Point2f(entry.width, entry.height);
     }
 
-    private static void drawString(FontRenderer font, TextEntry entry, int x, int y, int color) {
+    private static void drawString(FontRenderer font, TextItem<String> entry, int x, int y, int color) {
         if (entry.shadow) {
-            font.drawStringWithShadow(entry.text, x, y, color);
+            font.drawStringWithShadow(entry.component, x, y, color);
         } else {
-            font.drawString(entry.text, x, y, color);
+            font.drawString(entry.component, x, y, color);
         }
     }
 

@@ -6,11 +6,12 @@ import com.coloryr.allmusic.codec.HudPosType;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class TextFrameBuffer {
-    protected final List<TextItem> texts = new ArrayList<>();
+public abstract class TextFrameBuffer<T> {
+    protected final List<TextItem<T>> texts = new ArrayList<>();
     protected int nowWidth, nowHeight;
     protected long offsetX;
     protected boolean isDraw;
+    protected float state;
     /**
      * KTV模式下的强制滚动偏移，>=0 时优先使用
      */
@@ -31,17 +32,25 @@ public abstract class TextFrameBuffer {
         return a / gcd(a, b) * b;   // 先除后乘防溢出
     }
 
+    public void use() {
+        isDraw = true;
+        texts.clear();
+    }
+
     public void clear() {
         texts.clear();
     }
 
-    public abstract void use();
+    public void unUse() {
+        isDraw = false;
+    }
 
-    public abstract void unUse();
+    public void resize(int width, int height) {
+        nowWidth = width;
+        nowHeight = height;
+    }
 
-    public abstract void resize(int width, int height);
-
-    public abstract void drawText(String text, int y, int color, boolean shadow);
+    public abstract void putText(String text, int y, int color, boolean shadow);
 
     public abstract void drawLine(float x, float y, float alpha, int line);
 
@@ -55,8 +64,8 @@ public abstract class TextFrameBuffer {
         offsetX++;
         if (isDraw) return;
         long temp = 1;
-        for (TextItem item : texts) {
-            temp = lcm(temp, item.textWidth);
+        for (TextItem<T> item : texts) {
+            temp = lcm(temp, item.width);
         }
         if (offsetX > temp) {
             offsetX = 0;
@@ -80,28 +89,36 @@ public abstract class TextFrameBuffer {
     /**
      * 获取当前应使用的水平滚动偏移
      */
-    protected float getOffset(TextItem item) {
+    protected float getOffset(TextItem<T> item, int maxWidth) {
+        if (state > 0) {
+            float maxOffset = item.width - maxWidth;
+            return maxOffset * state;
+        }
         if (ktvOffset >= 0) {
             return ktvOffset;
         }
-        return offsetX % item.textWidth;
+        return offsetX % item.width;
     }
 
-    public static class TextItem {
-        public final float renderWidth;
-        public final float renderHeight;
-        public final int textWidth;
-        public final int textHeight;
-        public final float y;
-        public final float scale;
+    public void setState(float state) {
+        this.state = state;
+    }
 
-        public TextItem(int width, int height, float y, float scale) {
-            this.textWidth = width;
-            this.textHeight = height;
-            this.renderWidth = width * scale;
-            this.renderHeight = height * scale;
+    public static class TextItem<T> {
+        public final T component;
+        public final int width;
+        public final int height;
+        public final boolean shadow;
+        public final int color;
+        public final float y;
+
+        public TextItem(int width, int height, float y, T component, boolean shadow, int color) {
+            this.width = width;
+            this.height = height;
+            this.component = component;
             this.y = y;
-            this.scale = scale;
+            this.shadow = shadow;
+            this.color = color;
         }
     }
 }

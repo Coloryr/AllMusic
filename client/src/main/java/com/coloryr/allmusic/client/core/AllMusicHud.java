@@ -48,11 +48,11 @@ public class AllMusicHud {
     /**
      * 文字渲染
      */
-    private final TextFrameBuffer stateRender;
-    private final TextFrameBuffer infoRender;
-    private final TextFrameBuffer lyricRender;
-    private final TextFrameBuffer lyricTranRender;
-    private final TextFrameBuffer lyricKtvRender;
+    private final TextFrameBuffer<?> stateRender;
+    private final TextFrameBuffer<?> infoRender;
+    private final TextFrameBuffer<?> lyricRender;
+    private final TextFrameBuffer<?> lyricTranRender;
+    private final TextFrameBuffer<?> lyricKtvRender;
     private final TextureRender progress1;
     private final TextureRender progress2;
     private final TextureRender progress3;
@@ -250,8 +250,11 @@ public class AllMusicHud {
         if (ktv == null || save == null || lyricWidth <= 0) {
             lyricRender.clearKtvOffset();
             lyricKtvRender.clearKtvOffset();
+            lyricTranRender.setState(0);
             return;
         }
+
+        lyricTranRender.setState(lyricState);
 
         float offset = 0;
         int maxWidth = save.lyric.maxWidth;
@@ -458,7 +461,7 @@ public class AllMusicHud {
                     if (item.isEmpty()) {
                         continue;
                     }
-                    infoRender.drawText(item, offset, save.info.color, save.info.shadow);
+                    infoRender.putText(item, offset, save.info.color, save.info.shadow);
                     offset += save.info.gap;
                 }
                 infoRender.unUse();
@@ -491,7 +494,7 @@ public class AllMusicHud {
                     if (item.isEmpty()) {
                         continue;
                     }
-                    lyricRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
+                    lyricRender.putText(item, offset, save.lyric.color, save.lyric.shadow);
                     offset += save.lyric.gap;
                 }
                 lyricRender.unUse();
@@ -520,7 +523,7 @@ public class AllMusicHud {
                     if (item.isEmpty()) {
                         continue;
                     }
-                    lyricTranRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
+                    lyricTranRender.putText(item, offset, save.lyric.color, save.lyric.shadow);
                     offset += save.lyric.gap;
                 }
                 lyricTranRender.unUse();
@@ -551,7 +554,7 @@ public class AllMusicHud {
                     if (item.isEmpty()) {
                         continue;
                     }
-                    lyricKtvRender.drawText(item, offset, save.lyric.color, save.lyric.shadow);
+                    lyricKtvRender.putText(item, offset, save.lyric.color, save.lyric.shadow);
                     offset += save.lyric.gap;
                 }
                 lyricKtvRender.unUse();
@@ -575,8 +578,8 @@ public class AllMusicHud {
 
                 stateRender.resize(allWidth, allHeight);
                 stateRender.use();
-                stateRender.drawText(all, 0, save.state.color, save.state.shadow);
-                stateRender.drawText(time, 10, save.state.color, save.state.shadow);
+                stateRender.putText(all, 0, save.state.color, save.state.shadow);
+                stateRender.putText(time, 10, save.state.color, save.state.shadow);
                 stateRender.unUse();
             }
             stateNeedUpdate = false;
@@ -588,6 +591,7 @@ public class AllMusicHud {
         if (save.lyric.enable) {
             lyricRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y, save.lyric.maxWidth, save.lyric.pos);
             lyricTranRender.draw(save.lyric.alpha, save.lyric.x, save.lyric.y + save.lyric.gap, save.lyric.maxWidth, save.lyric.pos);
+
             if (ktv != null) {
                 lyricKtvRender.drawWithState(save.lyric.alpha, save.lyric.x, save.lyric.y, save.lyric.maxWidth, lyricState, save.lyric.pos);
             }

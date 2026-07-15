@@ -9,30 +9,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class CoreRenderTarget extends TextFrameBuffer {
-    private static class TextEntry {
-        final Component component;
-        final int y;
-        final int color;
-        final boolean shadow;
-        final int width;
-        final int height;
-
-        TextEntry(Component component, int y, int color, boolean shadow, int width, int height) {
-            this.component = component;
-            this.y = y;
-            this.color = color;
-            this.shadow = shadow;
-            this.width = width;
-            this.height = height;
-        }
-    }
-
-    private final List<TextEntry> entries = new ArrayList<>();
-
+public class CoreRenderTarget extends TextFrameBuffer<Component> {
     private final boolean isState;
 
     public CoreRenderTarget(String name) {
@@ -40,25 +17,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
     }
 
     @Override
-    public void resize(int width, int height) {
-        nowWidth = width;
-        nowHeight = height;
-    }
-
-    @Override
-    public void use() {
-        isDraw = true;
-        clear();
-        entries.clear();
-    }
-
-    @Override
-    public void unUse() {
-        isDraw = false;
-    }
-
-    @Override
-    public void drawText(String text, int y, int color, boolean shadow) {
+    public void putText(String text, int y, int color, boolean shadow) {
         color = (color & 0x00FFFFFF) | 0xFF000000;
         Component component = MiniMessage.parse(text);
         Font font = Minecraft.getInstance().font;
@@ -71,8 +30,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (isState) {
             y = 0;
         }
-        entries.add(new TextEntry(component, y, color, shadow, width, height));
-        texts.add(new TextItem(width, height, y, 1.0f));
+        texts.add(new TextItem<>(width, height, y, component, shadow, color));
     }
 
     @Override
@@ -85,7 +43,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (gui == null) return;
         Font font = Minecraft.getInstance().font;
 
-        for (TextEntry entry : entries) {
+        for (TextItem<Component> entry : texts) {
             int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
             Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
 
@@ -115,14 +73,14 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (line >= texts.size()) {
             return;
         }
-        if (line >= entries.size()) return;
         GuiGraphics gui = AllMusicClient.context;
         if (gui == null) return;
-        TextEntry entry = entries.get(line);
+        TextItem<Component> entry = texts.get(line);
         gui.drawString(Minecraft.getInstance().font, entry.component,
                 (int) x, (int) (y + entry.y),
                 applyAlpha(entry.color, alpha), entry.shadow);
     }
+
 
     @Override
     public void drawWithState(float alpha, int x, int y, int maxWidth, float state, HudPosType dir) {
@@ -133,7 +91,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (gui == null) return;
         Font font = Minecraft.getInstance().font;
 
-        for (TextEntry entry : entries) {
+        for (TextItem<Component> entry : texts) {
             int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
             Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
 
@@ -146,7 +104,6 @@ public class CoreRenderTarget extends TextFrameBuffer {
                 float texOffset = maxOffset * state;
                 int revealWidth = (int) (maxWidth * state);
 
-                gui.enableScissor(drawX, Math.max(0, drawY), drawX + maxWidth, drawY + entry.height);
                 gui.enableScissor(drawX, Math.max(0, drawY), drawX + revealWidth, drawY + entry.height);
                 gui.drawString(font, entry.component, drawX - (int) texOffset, drawY, finalColor, entry.shadow);
                 gui.disableScissor();
@@ -164,8 +121,7 @@ public class CoreRenderTarget extends TextFrameBuffer {
         if (line >= texts.size()) {
             return new Point2f(0, 0);
         }
-        if (line >= entries.size()) return new Point2f(0, 0);
-        TextEntry entry = entries.get(line);
+        TextItem<Component> entry = texts.get(line);
         return new Point2f(entry.width, entry.height);
     }
 

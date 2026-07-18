@@ -249,7 +249,10 @@ public class AllMusicCore {
                 break;
             case HUD_DATA:
                 MusicPack.StringMusicPack pack8 = (MusicPack.StringMusicPack) pack;
-                hud.setPos(gson.fromJson(pack8.data, HudPosObj.class));
+                boolean fail = hud.setPos(gson.fromJson(pack8.data, HudPosObj.class));
+                if (!fail) {
+                    bridge.kick();
+                }
                 break;
             case TIME:
                 MusicPack.TimeMusicPack pack9 = (MusicPack.TimeMusicPack) pack;

@@ -15,7 +15,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
@@ -112,6 +114,17 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    @Override
+    public void kick() {
+        Minecraft client = Minecraft.getInstance();
+
+        ClientPacketListener packetListener = client.getConnection();
+        if (packetListener != null) {
+            Connection connection = packetListener.getConnection();
+            connection.disconnect(Component.nullToEmpty("Old AllMusic server"));
         }
     }
 

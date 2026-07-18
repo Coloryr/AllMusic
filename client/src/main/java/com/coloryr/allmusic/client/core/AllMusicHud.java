@@ -425,11 +425,13 @@ public class AllMusicHud {
      *
      * @param save 位置信息
      */
-    public void setPos(HudPosObj save) {
+    public boolean setPos(HudPosObj save) {
         this.save = save;
 
         infoNeedUpdate = true;
         lyricNeedUpdate = true;
+
+        return save != null && save.lyric != null && save.info != null && save.state != null && save.pic != null;
     }
 
     /**

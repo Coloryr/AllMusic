@@ -14,7 +14,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
@@ -217,40 +221,14 @@ public class AllMusic implements AllMusicBridge {
         return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS);
     }
 
-    public void drawPic(Object textureID, int size, int x, int y, int ang) {
-        int a = size / 2;
+    @Override
+    public void kick() {
+        Minecraft client = Minecraft.getMinecraft();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, (int) textureID);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        // GL11.glEnable(GL11.GL_ALPHA);
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float) x + a, (float) y + a, 0.0f);
-
-        if (ang > 0) {
-            GL11.glRotatef(ang, 0, 0, 1f);
+        NetHandlerPlayClient packetListener = client.getNetHandler();
+        if (packetListener != null) {
+            NetworkManager connection = packetListener.getNetworkManager();
+            connection.closeChannel(new ChatComponentText("Old AllMusic server"));
         }
-
-        int x0 = -a;
-        int x1 = a;
-        int y0 = -a;
-        int y1 = a;
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glTexCoord2f(0.0f, 0.0f);
-        GL11.glVertex3f(x0, y0, 0.0f);
-        GL11.glTexCoord2f(0.0f, 1.0f);
-        GL11.glVertex3f(x0, y1, 0.0f);
-        GL11.glTexCoord2f(1.0f, 1.0f);
-        GL11.glVertex3f(x1, y1, 0.0f);
-        GL11.glTexCoord2f(1.0f, 0.0f);
-        GL11.glVertex3f(x1, y0, 0.0f);
-        GL11.glEnd();
-        GL11.glPopMatrix();
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
-    public void drawText(String item, int x, int y, int color, boolean shadow) {
-        FontRenderer font = Minecraft.getMinecraft().fontRenderer;
-        font.drawString(item, x, y, color, shadow);
     }
 }

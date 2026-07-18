@@ -9,6 +9,8 @@ import com.coloryr.allmusic.comm.AllMusicInit;
 import com.coloryr.allmusic.comm.MusicCodec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -174,4 +176,14 @@ public class AllMusicClient implements AllMusicBridge, IPayloadHandler<MusicCode
         }
     }
 
+    @Override
+    public void kick() {
+        Minecraft client = Minecraft.getInstance();
+
+        ClientPacketListener packetListener = client.getConnection();
+        if (packetListener != null) {
+            Connection connection = packetListener.getConnection();
+            connection.disconnect(Component.nullToEmpty("Old AllMusic server"));
+        }
+    }
 }

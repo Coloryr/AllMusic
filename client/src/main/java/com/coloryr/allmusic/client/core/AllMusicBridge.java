@@ -95,4 +95,9 @@ public interface AllMusicBridge {
      * @return 内容
      */
     InputStream readFile(String file);
+
+    /**
+     * 踢出服务器
+     */
+    void kick();
 }

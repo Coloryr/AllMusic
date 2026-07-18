@@ -8,7 +8,9 @@ import com.coloryr.allmusic.client.core.render.TextureRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.IResource;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentString;
@@ -245,5 +247,15 @@ public class AllMusicClient implements AllMusicBridge {
         }
 
         return result;
+    }
+
+    public void kick() {
+        Minecraft client = Minecraft.getMinecraft();
+
+        NetHandlerPlayClient packetListener = client.getConnection();
+        if (packetListener != null) {
+            NetworkManager connection = packetListener.getNetworkManager();
+            connection.closeChannel(new TextComponentString("Old AllMusic server"));
+        }
     }
 }

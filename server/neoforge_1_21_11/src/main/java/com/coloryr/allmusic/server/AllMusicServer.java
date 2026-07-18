@@ -34,28 +34,22 @@ public class AllMusicServer {
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
-        if (event.getCommandSelection() != Commands.CommandSelection.INTEGRATED) {
-            CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-            CommandNeoForge.instance.register(dispatcher);
-        }
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+        CommandNeoForge.instance.register(dispatcher);
     }
 
     @SubscribeEvent
     public static void onServerStarting(ServerStartedEvent event) {
-        if (event.getServer().isDedicatedServer()) {
-            audiences = MinecraftServerAudiences.of(event.getServer());
-            server = event.getServer();
-            AllMusic.init(new File(AllMusic.SERVER_DIR));
-            AllMusic.start();
-            Tasks.init();
-        }
+        audiences = MinecraftServerAudiences.of(event.getServer());
+        server = event.getServer();
+        AllMusic.init(new File(AllMusic.SERVER_DIR));
+        AllMusic.start();
+        Tasks.init();
     }
 
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent event) {
-        if (event.getServer().isDedicatedServer()) {
-            AllMusic.stop();
-        }
+        AllMusic.stop();
     }
 
     @SubscribeEvent

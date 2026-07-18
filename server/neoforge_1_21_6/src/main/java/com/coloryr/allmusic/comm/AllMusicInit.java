@@ -16,8 +16,6 @@ public class AllMusicInit implements IPayloadHandler<MusicCodec> {
 
     public AllMusicInit(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::register);
-
-
     }
 
     public void register(final RegisterPayloadHandlersEvent event) {

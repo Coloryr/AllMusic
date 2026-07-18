@@ -6,7 +6,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-@EventBusSubscriber(modid = "allmusic_server", value = Dist.DEDICATED_SERVER, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "allmusic_server", bus = EventBusSubscriber.Bus.MOD)
 public class AllMusicServer {
     public static final Logger LOGGER = LoggerFactory.getLogger("AllMusic Server");
     public static MinecraftServer server;
@@ -32,7 +31,7 @@ public class AllMusicServer {
         AllMusic.side = new SideNeoForge();
     }
 
-    @EventBusSubscriber(modid = "allmusic_server", value = Dist.DEDICATED_SERVER)
+    @EventBusSubscriber(modid = "allmusic_server")
     public static class MusicEvent {
         @SubscribeEvent
         public static void onRegisterCommands(RegisterCommandsEvent event) {

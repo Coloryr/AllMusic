@@ -13,6 +13,15 @@ authors = "Color_yr"
 description = '''AllMusic Mod'''
 
 [[mods]]
+modId = "allmusic_client"
+version = "${version}"
+displayName = "AllMusic Client"
+displayURL = "https://github.com/Coloryr/AllMusic/"
+logoFile = "icon.png"
+authors = "Color_yr"
+description = '''AllMusic Client Mod'''
+
+[[mods]]
 modId = "allmusic_server"
 version = "${version}"
 displayName = "AllMusic Server"
@@ -21,16 +30,42 @@ logoFile = "icon.png"
 authors = "Color_yr"
 description = '''AllMusic Server Mod'''
 
+[[dependencies.allmusic_client]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.1.0.19-beta,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.allmusic_client]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.allmusic_client]]
+modId="modernui"
+type="optional"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.allmusic_client]]
+modId="voicechat_api"
+type="optional"
+ordering="AFTER"
+side="CLIENT"
+
 [[dependencies.allmusic_server]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.0.167,)"
+versionRange = "[26.1.0.19-beta,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.allmusic_server]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21,)"
+versionRange = "[26.1,)"
 ordering = "NONE"
 side = "BOTH"

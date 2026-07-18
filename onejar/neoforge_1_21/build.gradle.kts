@@ -6,6 +6,26 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_21
 java.targetCompatibility = JavaVersion.VERSION_21
 
+// 直接引用 client 和 server 模块的源码目录，无需手动复制
+val clientSourceDir = project(":client:neoforge_1_21").projectDir.resolve("src/main/java/com/coloryr/allmusic/client")
+val serverSourceDir = project(":server:neoforge_1_21").projectDir.resolve("src/main/java/com/coloryr/allmusic/server")
+val commSourceDir = project(":server:neoforge_1_21").projectDir.resolve("src/main/java/com/coloryr/allmusic/comm")
+val clientResDir = project(":client:neoforge_1_21").projectDir.resolve("src/main/resources")
+
+sourceSets {
+    main {
+        java {
+            setSrcDirs(listOf(clientSourceDir, serverSourceDir, commSourceDir))
+        }
+        resources {
+            setSrcDirs(listOf(
+                file("src/main/resources"),  // onejar 自己的合并资源（fabric.mod.json）
+                clientResDir,
+            ))
+        }
+    }
+}
+
 //architectury {
 //  platformSetupLoomIde()
 //  neoForge()
@@ -27,6 +47,8 @@ dependencies {
 
 tasks {
     processResources {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
         filesMatching("META-INF/neoforge.mods.toml") {
             expand("version" to project.version)
         }
@@ -34,7 +56,7 @@ tasks {
 
     remapJar {
         inputFile.set(shadowJar.get().archiveFile)
-        archiveFileName.set("[neoforge-1.21]AllMusic_Server-${project.version}.jar")
+        archiveFileName.set("[neoforge-1.21]AllMusic-${project.version}.jar")
         destinationDirectory.set(file("${parent!!.projectDir}/../build"))
     }
 

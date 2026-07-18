@@ -6,11 +6,11 @@ issueTrackerURL = "https://github.com/Coloryr/AllMusic/issues"
 [[mods]]
 modId = "allmusic"
 version = "${version}"
-displayName = "AllMusic Server"
+displayName = "AllMusic"
 displayURL = "https://github.com/Coloryr/AllMusic/"
 logoFile = "icon.png"
 authors = "Color_yr"
-description = '''AllMusic Server Mod'''
+description = '''AllMusic Mod'''
 
 [[mods]]
 modId = "allmusic_server"

@@ -292,7 +292,7 @@ public class SideVelocity extends BaseSide implements IEconomy {
             server = player.getCurrentServer().get().getServerInfo().getName();
         }
 
-        return AllMusic.isSkip(player.getUsername(), server, true);
+        return AllMusic.isSkip(player.getUsername(), server, false);
     }
 
     @Override

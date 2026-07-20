@@ -54,7 +54,7 @@ public class CoreRenderTarget extends TextFrameBuffer<String> {
             GL11.glTranslatef(drawX, drawY, 0);
 
             if (maxWidth != -1 && entry.width > maxWidth) {
-                int scrollOffset = (int) (offsetX % entry.width);
+                int scrollOffset = (int) getOffset(entry, maxWidth);
                 enableScissor(drawX, drawY, maxWidth, entry.height);
                 drawString(font, entry, -scrollOffset, 0, finalColor);
                 if (scrollOffset > 0) {

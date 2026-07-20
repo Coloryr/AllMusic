@@ -54,7 +54,7 @@ public class CoreRenderTarget extends TextFrameBuffer<Component> {
             int finalColor = applyAlpha(entry.color, alpha);
 
             if (maxWidth != -1 && entry.width > maxWidth) {
-                int scrollOffset = (int) (offsetX % entry.width);
+                int scrollOffset = (int) getOffset(entry, maxWidth);
                 enableScissor(drawX, drawY, maxWidth, entry.height);
                 drawString(font, matrices, entry, drawX - scrollOffset, drawY, finalColor);
                 if (scrollOffset > 0) {

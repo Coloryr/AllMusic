@@ -60,6 +60,7 @@ public class AllMusicPlayer extends InputStream {
 
     public void stop() {
         isRun = false;
+        isClose = true;
         semaphore.release();
         semaphoreReload.release();
         scheduler.close();
@@ -157,8 +158,8 @@ public class AllMusicPlayer extends InputStream {
 
                 resetSource();
 
-                nowTask = tasks.pop();
-                if (nowTask == null || nowTask.url == null || nowTask.url.isEmpty()) continue;
+                PlayTaskObj task = tasks.pop();
+                if (task == null || task.url == null || task.url.isEmpty()) continue;
                 tasks.clear();
                 try {
                     local = 0;
@@ -193,18 +194,24 @@ public class AllMusicPlayer extends InputStream {
                 int frequency = decoder.getOutputFrequency();
                 int channels = decoder.getOutputChannels();
                 if (channels != 1 && channels != 2) continue;
-                if (nowTask.time != 0) {
-                    decoder.set(nowTask.time);
+                if (task.time != 0) {
+                    decoder.set(task.time);
                 }
                 reload = false;
                 isClose = false;
                 int chatCount = 0;
 
                 while (true) {
+                    if (!isRun) {
+                        return;
+                    }
                     try {
                         if (isClose) break;
 
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
+                            if (!isRun) {
+                                return;
+                            }
                             if (isClose) break;
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;
@@ -279,7 +286,7 @@ public class AllMusicPlayer extends InputStream {
                             break;
                         }
                         if (reload) {
-                            tasks.push(nowTask);
+                            tasks.push(task);
                             semaphore.release();
                             continue;
                         }
@@ -297,7 +304,8 @@ public class AllMusicPlayer extends InputStream {
                         queued--;
                     }
                 } else {
-                    tasks.push(nowTask);
+                    tasks.push(task);
+                    index = -1;
                     semaphore.release();
                 }
             } catch (Exception e) {

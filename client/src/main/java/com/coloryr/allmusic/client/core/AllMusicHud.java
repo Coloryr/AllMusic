@@ -82,6 +82,8 @@ public class AllMusicHud {
     private BufferedImage bg2;
     private boolean isRun;
 
+    private final ScheduledExecutorService service1;
+
     /**
      * 是否有图片
      */
@@ -112,14 +114,10 @@ public class AllMusicHud {
         thread.setName("allmusic_pic");
         thread.start();
 
-        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(this::picRotateTick, 0, 1, TimeUnit.MILLISECONDS);
-
-        service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(this::lyricTick, 0, 10, TimeUnit.MILLISECONDS);
-
-        service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(this::loopTick, 0, 100, TimeUnit.MILLISECONDS);
+        service1 = Executors.newScheduledThreadPool(3);
+        service1.scheduleAtFixedRate(this::picRotateTick, 0, 1, TimeUnit.MILLISECONDS);
+        service1.scheduleAtFixedRate(this::lyricTick, 0, 10, TimeUnit.MILLISECONDS);
+        service1.scheduleAtFixedRate(this::loopTick, 0, 100, TimeUnit.MILLISECONDS);
 
         picRender = AllMusicCore.bridge.makePictureRender(size);
 
@@ -151,6 +149,8 @@ public class AllMusicHud {
 
     public void stop() {
         isRun = false;
+        service1.close();
+        semaphore.release();
     }
 
     public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {

@@ -55,19 +55,19 @@ include(":server:folia")
 include(":server:paper")
 include(":server:velocity")
 
-include(":onejar")
-
-include(":onejar:fabric_1_16_5")
-include(":onejar:fabric_1_20_1")
-include(":onejar:fabric_1_21")
-include(":onejar:fabric_1_21_6")
-include(":onejar:fabric_1_21_11")
-include(":onejar:fabric_26_1")
-include(":onejar:fabric_26_2")
-include(":onejar:neoforge_1_21")
-include(":onejar:neoforge_1_21_6")
-include(":onejar:neoforge_1_21_11")
-include(":onejar:neoforge_26_1")
+//include(":onejar")
+//
+//include(":onejar:fabric_1_16_5")
+//include(":onejar:fabric_1_20_1")
+//include(":onejar:fabric_1_21")
+//include(":onejar:fabric_1_21_6")
+//include(":onejar:fabric_1_21_11")
+//include(":onejar:fabric_26_1")
+//include(":onejar:fabric_26_2")
+//include(":onejar:neoforge_1_21")
+//include(":onejar:neoforge_1_21_6")
+//include(":onejar:neoforge_1_21_11")
+//include(":onejar:neoforge_26_1")
 
 pluginManagement {
     repositories {

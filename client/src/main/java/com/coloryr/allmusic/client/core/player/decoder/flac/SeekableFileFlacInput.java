@@ -17,7 +17,7 @@
 
 package com.coloryr.allmusic.client.core.player.decoder.flac;
 
-import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
+import com.coloryr.allmusic.client.core.AllMusicPlayer;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

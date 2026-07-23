@@ -1,6 +1,5 @@
-package com.coloryr.allmusic.client.core.player;
+package com.coloryr.allmusic.client.core;
 
-import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.objs.PlayTaskObj;
 import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
@@ -41,21 +40,16 @@ public class AllMusicPlayer extends InputStream {
     private boolean isPlay = false;
     private boolean wait = false;
     private int index = -1;
-    private IntBuffer source;
+    private final IntBuffer source;
     private long local;
     private boolean isRun;
     private boolean isChat;
-    private ScheduledExecutorService scheduler;
+    private int chatCount = 0;
 
     public AllMusicPlayer(IntBuffer source) {
-        try {
-            this.source = source;
-            new Thread(this::run, "allmusic_run").start();
-            scheduler = Executors.newSingleThreadScheduledExecutor();
-            scheduler.scheduleAtFixedRate(this::timerTick, 0, 10, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.source = source;
+        new Thread(this::run, "allmusic_run").start();
+        AllMusicCore.service.scheduleAtFixedRate(this::timerTick, 0, 10, TimeUnit.MILLISECONDS);
     }
 
     public void stop() {
@@ -63,7 +57,6 @@ public class AllMusicPlayer extends InputStream {
         isClose = true;
         semaphore.release();
         semaphoreReload.release();
-        scheduler.close();
     }
 
     public void setChat() {
@@ -84,12 +77,9 @@ public class AllMusicPlayer extends InputStream {
         if (nowTask == null) {
             return;
         }
-        String url = nowTask.url;
-        closePlayer();
-        PlayTaskObj task = new PlayTaskObj();
-        task.url = url;
-        task.time = time;
-        tasks.push(task);
+        isClose = true;
+        nowTask.time = time;
+        tasks.push(nowTask);
         semaphore.release();
     }
 
@@ -110,23 +100,49 @@ public class AllMusicPlayer extends InputStream {
     }
 
     private void resetSource() {
-        if (index != -1) {
-            AL10.alSourceStop(index);
-            AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
+        AL10.alSourceStop(index);
+        AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
 
-            int queued;
-            do {
-                queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                if (queued > 0) {
-                    int buffer = AL10.alSourceUnqueueBuffers(index);
-                    if (buffer != 0) {
-                        AL10.alDeleteBuffers(buffer);
-                    }
+        int queued;
+        do {
+            queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
+            if (queued > 0) {
+                int buffer = AL10.alSourceUnqueueBuffers(index);
+                if (buffer != 0) {
+                    AL10.alDeleteBuffers(buffer);
                 }
-            } while (queued > 0);
+            }
+        } while (queued > 0);
+    }
 
-            AL10.alSourcef(index, AL10.AL_GAIN, AllMusicCore.bridge.getVolume());
-            AL10.alSourcef(index, AL10.AL_PITCH, 1.0f);
+    private void checkChat() {
+        if (isChat) {
+            chatCount++;
+            if (chatCount >= 200) {
+                isChat = false;
+                chatCount = 0;
+            }
+        }
+    }
+
+    private void dequeue() {
+        int processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED);
+        for (int i = 0; i < processed; i++) {
+            int buffer = AL10.alSourceUnqueueBuffers(index);
+            if (buffer != 0) {
+                AL10.alDeleteBuffers(buffer);
+            }
+        }
+    }
+
+    private void checkVolume() {
+        float temp = AllMusicCore.bridge.getVolume();
+        float now = AL10.alGetSourcef(index, AL10.AL_GAIN);
+        if (isChat) {
+            temp *= 0.2F;
+        }
+        if (now != temp) {
+            AL10.alSourcef(index, AL10.AL_GAIN, temp);
         }
     }
 
@@ -156,10 +172,11 @@ public class AllMusicPlayer extends InputStream {
                     }
                 }
 
+                dequeue();
                 resetSource();
 
-                PlayTaskObj task = tasks.pop();
-                if (task == null || task.url == null || task.url.isEmpty()) continue;
+                nowTask = tasks.pop();
+                if (nowTask == null || nowTask.url == null || nowTask.url.isEmpty()) continue;
                 tasks.clear();
                 try {
                     local = 0;
@@ -194,25 +211,27 @@ public class AllMusicPlayer extends InputStream {
                 int frequency = decoder.getOutputFrequency();
                 int channels = decoder.getOutputChannels();
                 if (channels != 1 && channels != 2) continue;
-                if (task.time != 0) {
-                    decoder.set(task.time);
+                if (nowTask.time != 0) {
+                    decoder.set(nowTask.time);
                 }
                 reload = false;
                 isClose = false;
-                int chatCount = 0;
 
                 while (true) {
                     if (!isRun) {
                         return;
                     }
+                    if (isClose) {
+                        break;
+                    }
                     try {
-                        if (isClose) break;
-
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
                             if (!isRun) {
                                 return;
                             }
-                            if (isClose) break;
+                            if (isClose) {
+                                break;
+                            }
                             BuffPack output = decoder.decodeFrame();
                             if (output == null) break;
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
@@ -238,32 +257,11 @@ public class AllMusicPlayer extends InputStream {
                             }
                         }
 
-                        float temp = AllMusicCore.bridge.getVolume();
-                        float now = AL10.alGetSourcef(index, AL10.AL_GAIN);
-                        if (isChat) {
-                            temp *= 0.2F;
-                        }
-                        if (now != temp) {
-                            AL10.alSourcef(index, AL10.AL_GAIN, temp);
-                        }
-
-                        int processed = AL10.alGetSourcei(index, AL10.AL_BUFFERS_PROCESSED);
-                        for (int i = 0; i < processed; i++) {
-                            int buffer = AL10.alSourceUnqueueBuffers(index);
-                            if (buffer != 0) {
-                                AL10.alDeleteBuffers(buffer);
-                            }
-                        }
-
                         Thread.sleep(5);
 
-                        if (isChat) {
-                            chatCount++;
-                            if (chatCount >= 200) {
-                                isChat = false;
-                                chatCount = 0;
-                            }
-                        }
+                        checkChat();
+                        checkVolume();
+                        dequeue();
                     } catch (Exception e) {
                         if (!isClose) {
                             e.printStackTrace();
@@ -277,6 +275,9 @@ public class AllMusicPlayer extends InputStream {
 
                 while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
                     Thread.sleep(50);
+                    checkChat();
+                    checkVolume();
+                    dequeue();
                 }
 
                 if (!reload) {
@@ -286,26 +287,18 @@ public class AllMusicPlayer extends InputStream {
                             break;
                         }
                         if (reload) {
-                            tasks.push(task);
+                            tasks.push(nowTask);
                             semaphore.release();
                             continue;
                         }
                     }
                     isPlay = false;
 
-                    AL10.alSourceStop(index);
-                    AL10.alSourcei(index, AL10.AL_BUFFER, AL10.AL_NONE);
-                    int queued = AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED);
-                    while (queued > 0) {
-                        int buffer = AL10.alSourceUnqueueBuffers(index);
-                        if (buffer != 0) {
-                            AL10.alDeleteBuffers(buffer);
-                        }
-                        queued--;
-                    }
+                    dequeue();
+                    resetSource();
                 } else {
-                    tasks.push(task);
                     index = -1;
+                    tasks.push(nowTask);
                     semaphore.release();
                 }
             } catch (Exception e) {
@@ -350,6 +343,13 @@ public class AllMusicPlayer extends InputStream {
         if (decoder != null) {
             decoder.close();
             decoder = null;
+        }
+    }
+
+    public void setReload() {
+        if (isPlay) {
+            reload = true;
+            isClose = true;
         }
     }
 
@@ -405,12 +405,5 @@ public class AllMusicPlayer extends InputStream {
         streamClose();
         this.local = local;
         connect();
-    }
-
-    public void setReload() {
-        if (isPlay) {
-            reload = true;
-            isClose = true;
-        }
     }
 }

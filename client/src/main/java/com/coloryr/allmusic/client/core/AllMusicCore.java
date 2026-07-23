@@ -1,7 +1,6 @@
 package com.coloryr.allmusic.client.core;
 
 import com.coloryr.allmusic.client.core.objs.ConfigObj;
-import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
 import com.coloryr.allmusic.codec.CommandType;
 import com.coloryr.allmusic.codec.HudPosObj;
 import com.coloryr.allmusic.codec.MusicPack;
@@ -26,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * AllMusic核心
@@ -51,6 +52,8 @@ public class AllMusicCore {
      * 界面显示内容
      */
     private static AllMusicHud hud;
+
+    public static final ScheduledExecutorService service = Executors.newScheduledThreadPool(4);
 
     /**
      * 更新音频缓存
@@ -135,6 +138,8 @@ public class AllMusicCore {
     }
 
     public static void stop() {
+        service.close();
+
         if (player != null) {
             player.stop();
         }

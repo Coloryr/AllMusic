@@ -27,7 +27,7 @@
 
 package com.coloryr.allmusic.client.core.player.decoder.mp3;
 
-import com.coloryr.allmusic.client.core.player.AllMusicPlayer;
+import com.coloryr.allmusic.client.core.AllMusicPlayer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

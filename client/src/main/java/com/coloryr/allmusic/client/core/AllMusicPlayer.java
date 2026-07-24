@@ -19,9 +19,8 @@ import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Objects;
 import java.util.Stack;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -79,6 +78,7 @@ public class AllMusicPlayer extends InputStream {
         }
         isClose = true;
         nowTask.time = time;
+        tasks.clear();
         tasks.push(nowTask);
         semaphore.release();
     }
@@ -153,9 +153,6 @@ public class AllMusicPlayer extends InputStream {
         isRun = true;
         while (true) {
             try {
-                if (!isRun) {
-                    return;
-                }
                 semaphore.acquire();
                 if (!isRun) {
                     return;
@@ -175,8 +172,14 @@ public class AllMusicPlayer extends InputStream {
                 dequeue();
                 resetSource();
 
+                if (tasks.isEmpty()) {
+                    continue;
+                }
+
                 nowTask = tasks.pop();
-                if (nowTask == null || nowTask.url == null || nowTask.url.isEmpty()) continue;
+                if (nowTask == null || nowTask.url == null || nowTask.url.isEmpty()) {
+                    continue;
+                }
                 tasks.clear();
                 try {
                     local = 0;
@@ -208,13 +211,14 @@ public class AllMusicPlayer extends InputStream {
                 }
 
                 isPlay = true;
+
                 int frequency = decoder.getOutputFrequency();
                 int channels = decoder.getOutputChannels();
                 if (channels != 1 && channels != 2) continue;
                 if (nowTask.time != 0) {
                     decoder.set(nowTask.time);
                 }
-                reload = false;
+
                 isClose = false;
 
                 while (true) {
@@ -279,33 +283,35 @@ public class AllMusicPlayer extends InputStream {
                 streamClose();
                 decodeClose();
 
-                while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
-                    Thread.sleep(50);
-                    checkChat();
-                    checkVolume();
+                if (AL10.alIsSource(index)) {
+                    while (!isClose && AL10.alGetSourcei(index, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
+                        Thread.sleep(50);
+                        checkChat();
+                        checkVolume();
+                        dequeue();
+                    }
+
                     dequeue();
+                    resetSource();
                 }
 
-                if (!reload) {
+                if (reload) {
                     wait = true;
-                    if (semaphoreReload.tryAcquire(500, TimeUnit.MILLISECONDS)) {
-                        if (!isRun) {
-                            break;
-                        }
+                    if (semaphoreReload.tryAcquire(1, TimeUnit.SECONDS)) {
                         if (reload) {
+                            reload = false;
+                            index = -1;
                             tasks.push(nowTask);
                             semaphore.release();
                             continue;
                         }
                     }
-                    isPlay = false;
+                }
 
-                    dequeue();
-                    resetSource();
-                } else {
-                    index = -1;
-                    tasks.push(nowTask);
-                    semaphore.release();
+                isPlay = false;
+
+                if (!isRun) {
+                    return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -323,9 +329,19 @@ public class AllMusicPlayer extends InputStream {
     public void closePlayer() {
         isClose = true;
         nowTask = null;
+        tasks.clear();
     }
 
     public void setMusic(String url) {
+        if (nowTask != null && nowTask.url.equalsIgnoreCase(url)) {
+            return;
+        }
+        for (PlayTaskObj item : tasks) {
+            if (item.url.equalsIgnoreCase(url)) {
+                return;
+            }
+        }
+
         closePlayer();
         PlayTaskObj taskObj = new PlayTaskObj();
         taskObj.time = 0;

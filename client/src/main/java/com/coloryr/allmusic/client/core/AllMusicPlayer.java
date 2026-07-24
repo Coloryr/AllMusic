@@ -233,7 +233,9 @@ public class AllMusicPlayer extends InputStream {
                                 break;
                             }
                             BuffPack output = decoder.decodeFrame();
-                            if (output == null) break;
+                            if (output == null) {
+                                break;
+                            }
                             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(output.len)
                                     .put(output.buff, 0, output.len);
                             ((Buffer) byteBuffer).flip();

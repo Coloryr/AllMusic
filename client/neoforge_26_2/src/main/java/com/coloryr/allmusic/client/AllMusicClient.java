@@ -80,11 +80,6 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
     }
 
     @SubscribeEvent
-    public static void onLoad(final SoundEngineLoadEvent e) {
-        AllMusicCore.reload();
-    }
-
-    @SubscribeEvent
     public static void onRenderOverlay(RenderGuiLayerEvent.Post e) {
         if (e.getName().equals(VanillaGuiLayers.CAMERA_OVERLAYS)) {
             context = e.getGuiGraphics();

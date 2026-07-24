@@ -46,7 +46,6 @@ public class AllMusicClient implements AllMusicBridge {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::setup);
-        modEventBus.addListener(this::onLoad);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -102,10 +101,6 @@ public class AllMusicClient implements AllMusicBridge {
 
     public int getFontHeight() {
         return Minecraft.getInstance().font.lineHeight;
-    }
-
-    public void onLoad(final SoundEngineLoadEvent e) {
-        AllMusicCore.reload();
     }
 
     @SubscribeEvent

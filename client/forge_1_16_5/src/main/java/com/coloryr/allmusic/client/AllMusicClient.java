@@ -149,7 +149,7 @@ public class AllMusicClient implements AllMusicBridge {
     }
 
     @Override
-    public TextFrameBuffer makeTextRender(String name) {
+    public TextFrameBuffer<?> makeTextRender(String name) {
         return new CoreRenderTarget(name);
     }
 

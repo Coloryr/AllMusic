@@ -224,6 +224,10 @@ public class AllMusicPlayer extends InputStream {
                     if (isClose) {
                         break;
                     }
+                    if (!AL10.alIsSource(index)) {
+                        setReload();
+                        break;
+                    }
                     try {
                         while (AL10.alGetSourcei(index, AL10.AL_BUFFERS_QUEUED) < AllMusicCore.config.queueSize) {
                             if (!isRun) {

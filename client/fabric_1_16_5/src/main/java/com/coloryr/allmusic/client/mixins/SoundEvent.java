@@ -36,9 +36,4 @@ public class SoundEvent {
             }
         }
     }
-
-    @Inject(method = "resume", at = @At("RETURN"))
-    public void reload(CallbackInfo info) {
-        AllMusicCore.reload();
-    }
 }

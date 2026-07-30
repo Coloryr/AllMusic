@@ -119,10 +119,13 @@ public class CommandEX {
             return;
         }
 
+        String[] newArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        
         PlayerAddMusicObj obj = new PlayerAddMusicObj();
         obj.sender = sender;
         obj.name = name;
-        obj.args = args;
+        obj.args = newArgs;
         obj.isDefault = isDefault;
         obj.api = apiname;
 

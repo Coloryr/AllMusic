@@ -3,14 +3,17 @@
 ![AllMusic](https://socialify.git.ci/Coloryr/AllMusic/image?description=1&font=Inter&forks=1&logo=https%3A%2F%2Fgithub.com%2FColoryr%2FAllMusic%2Fblob%2Fmain%2Fserver%2Fneoforge_26_1%2Fsrc%2Fmain%2Fresources%2Ficon.png%3Fraw%3Dtrue&name=1&owner=1&pattern=Signal&stargazers=1&theme=Auto)
 
 ![](https://img.shields.io/badge/Version-3.1.4-blue?style=for-the-badge)
-![](https://img.shields.io/github/actions/workflow/status/Coloryr/AllMusic/gradle.yml?style=for-the-badge)
+![](https://img.shields.io/github/actions/workflow/status/Coloryr/AllMusic/client.yml?style=for-the-badge)
+![](https://img.shields.io/github/actions/workflow/status/Coloryr/AllMusic/server.yml?style=for-the-badge)
+![](https://img.shields.io/github/actions/workflow/status/Coloryr/AllMusic/onejar.yml?style=for-the-badge)
 ![](https://img.shields.io/github/license/Coloryr/AllMusic?style=for-the-badge)
 
 </div>
 
 ![GIF.gif](img/GIF.gif)
 
-注：需要配合客户端Mod使用  
+**注：需要配合客户端Mod使用**  
+**1.7.10和1.12.2没有技术更新**  
 **不兼容旧版客户端Mod，需要新版客户端Mod**  
 **如果面板服有问题，请自己去问服务器商给不给你用**
 **4.0服务器只能跟4.0客户端用，不兼容3.0的服务器或客户端**
@@ -29,15 +32,17 @@
 1. 安装AllMusic_Server
 
 Paper服务器  
-复制`[paper]AllMusic_Server-4.0.0-all.jar`到你的`plugins`文件夹  
+复制`[paper]AllMusic_Server-4.0.0.jar`到你的`plugins`文件夹  
 Velocity服务器  
-复制`[velocity]AllMusic_Server-4.0.0-all.jar`到你的`plugins`文件夹  
+复制`[velocity]AllMusic_Server-4.0.0.jar`到你的`plugins`文件夹  
 Forge/Fabric/NeoForge类服务器  
-复制`[xxx-xxx]AllMusic_Server-4.0.0-all.jar`到你的`mods`文件夹  
+复制`[xxx-xxx]AllMusic_Server-4.0.0.jar`到你的`mods`文件夹  
 
 2. 安装客户端mod
-复制`[xxx-xxx]AllMusic_Client-4.0.0-all`到客户端的`mods`文件夹
+复制`[xxx-xxx]AllMusic_Client-4.0.0`到客户端的`mods`文件夹
 重启客户端
+
+如果你是单人游戏使用或者联机使用OneJar版本
 
 ## 音乐API
 AllMusic不会内置音乐api，你想要正常使用需要自己安装
@@ -61,12 +66,6 @@ AllMusic不会内置音乐api，你想要正常使用需要自己安装
 > %allmusic_music_list% 队列歌曲  
 > %allmusic_lyric% 歌词  
 > %allmusic_tlyric% 翻译的歌词
-
-## 更新日志
-
-```
-4.0.0：全新字体渲染，拆分音乐API
-```
 
 ## 配置文件说明
 配置文件采用json格式，需要遵守json编写的格式规范  

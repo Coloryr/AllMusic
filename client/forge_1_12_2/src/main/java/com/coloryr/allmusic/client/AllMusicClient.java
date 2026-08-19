@@ -18,6 +18,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -69,6 +70,11 @@ public class AllMusicClient implements AllMusicBridge {
             NetworkRegistry.INSTANCE.newEventDrivenChannel("allmusic:channel")
                     .register(this);
         }
+    }
+
+    @Mod.EventHandler
+    public void loadComplete(final FMLLoadCompleteEvent event) {
+        AllMusicCore.renderInit();
     }
 
     @SubscribeEvent

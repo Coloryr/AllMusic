@@ -1,6 +1,9 @@
+repositories {
+    maven("https://libraries.minecraft.net/")
+}
+
 dependencies {
-    // 使用较早且稳定的 API 编译，避免无意间调用新版本 BungeeCord 才提供的接口。
-    compileOnly("net.md-5:bungeecord-api:1.16-R0.4")
+    compileOnly("net.md-5:bungeecord-api:1.21-R0.4")
 
     shadowImplementation("net.kyori:adventure-platform-bungeecord:4.4.1") {
         exclude(group = "net.md-5", module = "bungeecord-api")

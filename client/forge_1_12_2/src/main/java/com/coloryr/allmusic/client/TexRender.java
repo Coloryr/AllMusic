@@ -138,7 +138,7 @@ public class TexRender extends TextureRender {
         float y1 = h1;
         float z = 0;
         float u0 = 0;
-        float u1 = width;
+        float u1 = 1;
         float v0 = 0;
         float v1 = 1;
 

@@ -1,3 +1,5 @@
+import com.gtnewhorizons.retrofuturagradle.mcp.ReobfuscatedJar
+
 plugins {
     id("com.gtnewhorizons.retrofuturagradle") version "2.0.2"
 }
@@ -31,15 +33,17 @@ tasks {
 
     shadowJar {
         archiveFileName.set("[forge-1.12.2]AllMusic_Server-${project.version}.jar")
-        destinationDirectory.set(file("${parent!!.projectDir}/../build"))
-
         relocate("net.kyori", "com.coloryr.allmusic.libs.net.kyori")
-//        relocate("com.google.gson", "com.coloryr.allmusic.libs.com.google.gson")
+    }
+
+    val reobfShadowJar = named<ReobfuscatedJar>("reobfShadowJar") {
+        archiveFileName.set("[forge-1.12.2]AllMusic_Server-${project.version}.jar")
+        destinationDirectory.set(file("${parent!!.projectDir}/../build"))
     }
 
     configurations.shadow.get().setExtendsFrom(listOf(configurations.named("shadowImplementation").get()))
 
     build {
-        dependsOn(shadowJar)
+        dependsOn(reobfShadowJar)
     }
 }

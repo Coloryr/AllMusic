@@ -1,0 +1,4 @@
+name: AllMusic
+main: com.coloryr.allmusic.server.AllMusicBungee
+author: Color_yr
+version: ${version}

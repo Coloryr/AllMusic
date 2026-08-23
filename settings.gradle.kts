@@ -55,6 +55,7 @@ include(":server:spigot")
 include(":server:paper")
 include(":server:folia")
 include(":server:paper")
+include(":server:bungeecord")
 include(":server:velocity")
 
 include(":onejar")

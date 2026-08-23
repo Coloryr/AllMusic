@@ -32,7 +32,7 @@ public class PicRender extends PictureFrameBuffer {
             image.getRGB(0, 0, image.getWidth(), image.getHeight(), sourceTexture.getTextureData(), 0, image.getWidth());
             sourceTexture.updateDynamicTexture();
 
-            stream = new ByteArrayInputStream(source);
+            stream = new ByteArrayInputStream(rotate);
             image = ImageIO.read(stream);
             image.getRGB(0, 0, image.getWidth(), image.getHeight(), rotateTexture.getTextureData(), 0, image.getWidth());
             rotateTexture.updateDynamicTexture();

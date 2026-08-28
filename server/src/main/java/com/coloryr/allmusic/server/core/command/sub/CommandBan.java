@@ -50,10 +50,10 @@ public class CommandBan extends ACommand {
         if (args.length == index || (args.length == index + 1)) {
             List<String> list = new ArrayList<>();
             if (PlayMusic.nowPlayMusic != null) {
-                list.add(PlayMusic.nowPlayMusic.getID());
+                list.add(PlayMusic.nowPlayMusic.getId());
             }
             for (SongInfoObj item : PlayMusic.getList()) {
-                list.add(item.getID());
+                list.add(item.getId());
             }
 
             return list;

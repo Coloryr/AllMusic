@@ -44,6 +44,7 @@ public class CommandEX {
         commandList.put("push", new CommandPush());
         commandList.put("join", new CommandJoin());
         commandList.put("cancel", new CommandCancel());
+        commandList.put("agree", new CommandAgree());
 
         commandAdminList.put("reload", new CommandReload());
         commandAdminList.put("next", new CommandNext());
@@ -197,7 +198,7 @@ public class CommandEX {
         musicID = api1.getMusicId(arg);
 
         if (api1.checkId(musicID)) {
-            if (PlayMusic.getListSize() >= AllMusic.getConfig().maxPlayList) {
+            if (PlayMusic.getListSize() >= AllMusic.getConfig().limit.maxPlayerList) {
                 AllMusic.side.sendMessageTask(sender, AllMusic.getMessage().addMusic.listFull);
             } else if (BanSave.checkBanMusic(musicID, api)) {
                 AllMusic.side.sendMessageTask(sender, AllMusic.getMessage().addMusic.banMusic);

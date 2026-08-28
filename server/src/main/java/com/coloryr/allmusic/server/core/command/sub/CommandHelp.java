@@ -24,6 +24,8 @@ public class CommandHelp extends ACommand {
                 .append(AllMusic.side.miniMessageSuggest(AllMusic.getMessage().click.clickRun, "/music push ")));
         AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().help.normal.push1)
                 .append(AllMusic.side.miniMessageRun(AllMusic.getMessage().click.clickRun, "/music push cancel")));
+        AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().help.normal.vote)
+                .append(AllMusic.side.miniMessageRun(AllMusic.getMessage().click.clickRun, "/music vote")));
         AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().help.normal.mute)
                 .append(AllMusic.side.miniMessageRun(AllMusic.getMessage().click.clickRun, "/music mute")));
         AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().help.normal.mutelist)

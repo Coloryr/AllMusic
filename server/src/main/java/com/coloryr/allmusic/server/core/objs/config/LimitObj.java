@@ -37,6 +37,14 @@ public class LimitObj {
      * 长度替换符号
      */
     public String limitText;
+    /**
+     * 最大歌曲数
+     */
+    public int maxPlayList;
+    /**
+     * 一个玩家最大可点数量
+     */
+    public int maxPlayerList;
 
     public static LimitObj make() {
         LimitObj obj = new LimitObj();
@@ -48,6 +56,8 @@ public class LimitObj {
         obj.listLimitSize = 10;
         obj.messageLimit = false;
         obj.messageLimitSize = 20;
+        obj.maxPlayList = 10;
+        obj.maxPlayerList = 10;
         obj.limitText = "...";
         return obj;
     }

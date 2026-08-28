@@ -4,7 +4,7 @@ import com.coloryr.allmusic.server.core.AllMusic;
 import com.coloryr.allmusic.server.core.command.ACommand;
 import com.coloryr.allmusic.server.core.command.PermissionList;
 import com.coloryr.allmusic.server.core.music.PlayMusic;
-import com.coloryr.allmusic.server.core.music.PlayRuntime;
+import com.coloryr.allmusic.server.core.music.VoteItem;
 import com.coloryr.allmusic.server.core.objs.message.ARG;
 import com.coloryr.allmusic.server.core.objs.music.SongInfoObj;
 import com.coloryr.allmusic.server.core.saves.BanSave;
@@ -32,22 +32,27 @@ public class CommandPush extends ACommand {
                 return;
             }
             SongInfoObj id1 = PlayMusic.findMusicIndex(1);
-            if (id1 != null && id1.getID().equalsIgnoreCase(music.getID())) {
+            if (id1 != null && id1.getId().equalsIgnoreCase(music.getId())) {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.pushErr);
                 return;
             }
+
+            VoteItem item = new VoteItem(music.getApi(), music.getId(), name, VoteItem.VoteType.PUSH);
+            if (PlayMusic.startVote(item)) {
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
+            } else {
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err3);
+            }
+
+            AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
         } else if (args.length == 2) {
             if (args[1].equalsIgnoreCase("cancel")) {
-                if (!name.equalsIgnoreCase(PlayMusic.getPushSender())) {
+                if (!PlayMusic.haveVote(name, VoteItem.VoteType.PUSH)) {
                     AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err1);
                     return;
                 }
-                if (PlayMusic.getPushTime() <= 0) {
-                    AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err2);
-                    return;
-                }
-                PlayMusic.clearPush();
-                AllMusic.side.broadcast(AllMusic.getMessage().push.cancel);
+                PlayMusic.removeVote(name, VoteItem.VoteType.PUSH);
+                AllMusic.side.sendMessage(name, AllMusic.getMessage().push.cancel1);
                 return;
             } else {
                 try {
@@ -61,42 +66,19 @@ public class CommandPush extends ACommand {
                     AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.noId1.replace(ARG.index, args[1]));
                     return;
                 }
+
+                VoteItem item = new VoteItem(music.getApi(), music.getId(), name, VoteItem.VoteType.PUSH);
+                if (PlayMusic.startVote(item)) {
+                    AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
+                } else {
+                    AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err3);
+                }
+
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
             }
         } else if (args.length > 2) {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.error);
             return;
-        }
-        if (PlayMusic.getPushTime() <= 0) {
-            if (music == null) {
-                return;
-            }
-            PlayMusic.startPush(name, music);
-            AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
-            String data = AllMusic.getMessage().push.bq;
-            data = data.replace(ARG.player, name)
-                    .replace(ARG.time, String.valueOf(AllMusic.getConfig().voteTime))
-                    .replace(ARG.musicName, music.getName())
-                    .replace(ARG.musicAuthor, music.getAuthor())
-                    .replace(ARG.countAll, String.valueOf(PlayRuntime.getMiniVote()));
-            AllMusic.side.broadcast(data);
-            AllMusic.side.broadcast(AllMusic.side.miniMessage(AllMusic.getMessage().push.bq1)
-                    .append(AllMusic.side.miniMessageRun(AllMusic.getMessage().push.bq2, "/music push")));
-        } else {
-            if (music != null) {
-                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err3);
-                return;
-            }
-            if (!PlayMusic.containPush(name)) {
-                PlayMusic.addPush(name);
-                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.agree);
-                String data = AllMusic.getMessage().push.bqAgree;
-                data = data.replace(ARG.player, name)
-                        .replace(ARG.count, String.valueOf(PlayMusic.getVoteCount()))
-                        .replace(ARG.countAll, String.valueOf(PlayRuntime.getMiniVote()));
-                AllMusic.side.broadcast(data);
-            } else {
-                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.arAgree);
-            }
         }
         BanSave.removeMutePlayer(name);
     }

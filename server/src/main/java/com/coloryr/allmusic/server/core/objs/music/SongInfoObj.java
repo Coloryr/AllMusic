@@ -128,7 +128,7 @@ public class SongInfoObj {
         name = info;
     }
 
-    public String getID() {
+    public String getId() {
         return id;
     }
 

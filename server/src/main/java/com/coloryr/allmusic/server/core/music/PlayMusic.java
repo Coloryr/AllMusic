@@ -26,13 +26,14 @@ public class PlayMusic {
      */
     private static final Set<String> nowPlayPlayer = new HashSet<>();
     /**
-     * 切歌投票的玩家
+     * 投票序列
      */
-    private static final Set<String> votePlayer = new HashSet<>();
+    private static final Queue<VoteItem> voteList = new ConcurrentLinkedQueue<>();
     /**
-     * 插歌投票的玩家
+     * 当前投票
      */
-    private static final Set<String> pushPlayer = new HashSet<>();
+    private static VoteItem vote;
+
     /**
      * 总歌曲长度
      */
@@ -66,22 +67,6 @@ public class PlayMusic {
      */
     private static int voteTime = 0;
     /**
-     * 切歌发起人
-     */
-    private static String voteSender;
-    /**
-     * 插歌投票时间
-     */
-    private static int pushTime = 0;
-    /**
-     * 插歌发起人
-     */
-    private static String pushSender;
-    /**
-     * 插歌目标
-     */
-    private static SongInfoObj push;
-    /**
      * 空闲列表取出的歌曲序号
      */
     private static int idleIndex;
@@ -93,115 +78,140 @@ public class PlayMusic {
         new Thread(PlayMusic::task, "allmusic_task").start();
     }
 
+    public static boolean haveVote(String name, VoteItem.VoteType voteType) {
+        name = name.toLowerCase(Locale.ROOT);
+        for (VoteItem item : voteList) {
+            if (item.getType() == voteType && item.getVoteSender().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
-     * 添加投票的玩家
+     * 通过投票
      *
      * @param player 用户名
      */
     public static void addVote(String player) {
-        player = player.toLowerCase();
-        votePlayer.add(player);
-    }
+        player = player.toLowerCase(Locale.ROOT);
+        if (vote == null) {
+            return;
+        }
 
-    public static void startVote(String player) {
-        player = player.toLowerCase();
-        voteSender = player;
-        votePlayer.add(player);
-        voteTime = AllMusic.getConfig().voteTime;
+        vote.votePlayer.add(player);
     }
 
     /**
-     * 添加投票的玩家
+     * 发起投票
      *
-     * @param player 用户名
+     * @param vote 投票内容
      */
-    public static void addPush(String player) {
-        player = player.toLowerCase();
-        pushPlayer.add(player);
+    public static boolean startVote(VoteItem vote) {
+        String id = vote.getId();
+        String api = vote.getApi();
+        for (VoteItem item : voteList) {
+            if (item.getId().equalsIgnoreCase(id) && item.getApi().equalsIgnoreCase(api)) {
+                return false;
+            }
+        }
+
+        voteList.add(vote);
+        voteTime = AllMusic.getConfig().vote.voteTime;
+
+        return true;
     }
 
-    public static void startPush(String player, SongInfoObj music) {
-        player = player.toLowerCase();
-        push = music;
-        pushSender = player;
-        pushPlayer.add(player);
-        pushTime = AllMusic.getConfig().voteTime;
+    public static SongInfoObj getMusic(String id, String api) {
+        for (SongInfoObj item : playList) {
+            if (item.getId().equalsIgnoreCase(id) && item.getApi().equalsIgnoreCase(api)) {
+                return item;
+            }
+        }
+
+        return null;
     }
 
-    public static void pushTick() {
-        pushTime--;
+    public static void doVote() {
+        if (vote == null) {
+            return;
+        }
+
+        if (vote.getType() == VoteItem.VoteType.NEXT) {
+            if (nowPlayMusic != null && nowPlayMusic.getApi()
+                    .equalsIgnoreCase(vote.getApi()) && nowPlayMusic.getId().equalsIgnoreCase(vote.getId())) {
+                musicLessTime = 0;
+                AllMusic.side.broadcastInTask(AllMusic.getMessage().vote.next);
+            }
+        } else {
+            SongInfoObj obj = getMusic(vote.getId(), vote.getApi());
+            if (obj != null) {
+                synchronized (playList) {
+                    playList.remove(obj);
+                    playList.add(0, obj);
+                }
+                AllMusic.side.broadcastInTask(AllMusic.getMessage().push.doPush);
+            }
+        }
+
+        vote = null;
     }
 
     public static void voteTick() {
         voteTime--;
     }
 
-    public static SongInfoObj getPush() {
-        return push;
-    }
-
-    public static int getPushTime() {
-        return pushTime;
-    }
-
-    public static String getPushSender() {
-        return pushSender;
-    }
-
     public static int getVoteTime() {
         return voteTime;
     }
 
-    public static String getVoteSender() {
-        return voteSender;
+    public static VoteItem getVote() {
+        return vote;
     }
 
-    /**
-     * 获取投票数量
-     *
-     * @return 数量
-     */
     public static int getVoteCount() {
-        return votePlayer.size();
+        return voteList.size();
     }
 
-    public static int getPushCount() {
-        return pushPlayer.size();
+    public static void removeVote(String name, VoteItem.VoteType voteType) {
+        if (vote != null) {
+            if (vote.getVoteSender().equalsIgnoreCase(name) && vote.getType() == voteType) {
+                removeVote();
+                if (voteType == VoteItem.VoteType.NEXT) {
+                    AllMusic.side.broadcast(AllMusic.getMessage().push.cancel);
+                }
+                else {
+                    AllMusic.side.broadcast(AllMusic.getMessage().vote.cancel);
+                }
+                return;
+            }
+        }
+
+        VoteItem item1 = null;
+        for (VoteItem item : voteList) {
+            if (item.getType() == voteType && item.getVoteSender().equalsIgnoreCase(name)) {
+                item1 = item;
+                break;
+            }
+        }
+
+        if (item1 != null) {
+            voteList.remove(item1);
+        }
+    }
+
+    public static void removeVote() {
+        vote = null;
     }
 
     /**
-     * 清空投票
+     * 下一个投票
+     * @return 投票
      */
-    public static void clearVote() {
-        voteTime = -1;
-        voteSender = null;
-        votePlayer.clear();
-    }
-
-    /**
-     * 清空插歌
-     */
-    public static void clearPush() {
-        pushTime = -1;
-        push = null;
-        pushSender = null;
-        pushPlayer.clear();
-    }
-
-    /**
-     * 是否已经投票了
-     *
-     * @param player 用户名
-     * @return 结果
-     */
-    public static boolean containVote(String player) {
-        player = player.toLowerCase();
-        return votePlayer.contains(player);
-    }
-
-    public static boolean containPush(String player) {
-        player = player.toLowerCase();
-        return pushPlayer.contains(player);
+    public static VoteItem nextVote() {
+        vote = voteList.poll();
+        return vote;
     }
 
     /**
@@ -231,11 +241,8 @@ public class PlayMusic {
             }
         }
         nowPlayPlayer.clear();
-        votePlayer.clear();
-        pushPlayer.clear();
         playList.clear();
-        clearVote();
-        clearPush();
+        voteList.clear();
 
         AllMusic.log.data("歌曲处理线程关闭");
     }
@@ -307,17 +314,6 @@ public class PlayMusic {
             }
             AllMusic.log.data("<light_purple>[AllMusic]<red>歌曲信息解析错误");
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * 将歌曲移动到队列头
-     */
-    public static void pushMusic() {
-        SongInfoObj obj = push;
-        synchronized (playList) {
-            playList.remove(obj);
-            playList.add(0, obj);
         }
     }
 
@@ -420,11 +416,11 @@ public class PlayMusic {
      * @return 是否在列表种
      */
     public static boolean haveMusic(String id, String api) {
-        if (nowPlayMusic != null && nowPlayMusic.getID().equalsIgnoreCase(id)
+        if (nowPlayMusic != null && nowPlayMusic.getId().equalsIgnoreCase(id)
                 && Objects.equals(nowPlayMusic.getApi(), api))
             return true;
         for (SongInfoObj item : playList) {
-            if (item.getID().equalsIgnoreCase(id) && Objects.equals(item.getApi(), api)) {
+            if (item.getId().equalsIgnoreCase(id) && Objects.equals(item.getApi(), api)) {
                 return true;
             }
         }
@@ -438,7 +434,7 @@ public class PlayMusic {
      * @return 是否超过上限
      */
     public static boolean isPlayerMax(String name) {
-        int list = AllMusic.getConfig().maxPlayerList;
+        int list = AllMusic.getConfig().limit.maxPlayerList;
         if (list == 0) {
             return false;
         }

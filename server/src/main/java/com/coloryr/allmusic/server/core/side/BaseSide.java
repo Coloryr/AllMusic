@@ -4,6 +4,7 @@ import com.coloryr.allmusic.codec.CommandType;
 import com.coloryr.allmusic.codec.HudPosObj;
 import com.coloryr.allmusic.codec.MusicPack;
 import com.coloryr.allmusic.server.core.AllMusic;
+import com.coloryr.allmusic.server.core.IMusicApi;
 import com.coloryr.allmusic.server.core.music.PlayMusic;
 import com.coloryr.allmusic.server.core.objs.music.PlayerAddMusicObj;
 import com.coloryr.allmusic.server.core.objs.music.SongInfoObj;
@@ -154,7 +155,13 @@ public abstract class BaseSide {
      * 重载
      */
     public final void reload() {
-        AllMusic.init(getFolder());
+        File basePath = getFolder();
+
+        AllMusic.init(basePath);
+
+        for (IMusicApi api : AllMusic.MUSIC_APIS.values()) {
+            api.reload(basePath);
+        }
     }
 
     /**

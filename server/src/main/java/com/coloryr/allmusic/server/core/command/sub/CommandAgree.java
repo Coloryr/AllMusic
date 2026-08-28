@@ -8,6 +8,8 @@ import com.coloryr.allmusic.server.core.music.PlayRuntime;
 import com.coloryr.allmusic.server.core.music.VoteItem;
 import com.coloryr.allmusic.server.core.objs.message.ARG;
 
+import java.util.Locale;
+
 public class CommandAgree extends ACommand  {
     @Override
     public void execute(Object sender, String name, String[] args) {
@@ -20,15 +22,15 @@ public class CommandAgree extends ACommand  {
         VoteItem vote = PlayMusic.getVote();
 
         if (vote == null) {
-            AllMusic.side.sendMessage(name, AllMusic.getMessage().vote.err4);
+            AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.err4);
             return;
         }
-        if (vote.votePlayer.contains(name)) {
-            AllMusic.side.sendMessage(name, AllMusic.getMessage().vote.err5);
+        if (vote.votePlayer.contains(name.toLowerCase(Locale.ROOT))) {
+            AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.err5);
             return;
         }
 
-        AllMusic.side.sendMessage(name, AllMusic.getMessage().vote.agree);
+        AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.agree);
         String data = AllMusic.getMessage().vote.bqAgree;
         data = data.replace(ARG.player, name)
                 .replace(ARG.count, String.valueOf(vote.votePlayer.size()))

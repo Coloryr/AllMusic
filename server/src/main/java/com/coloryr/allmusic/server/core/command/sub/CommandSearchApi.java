@@ -40,7 +40,7 @@ public class CommandSearchApi extends ACommand {
         System.arraycopy(args, 1, newArgs, 0, newArgs.length);
 
         AllMusic.side.sendMessage(sender, AllMusic.getMessage().search.startSearch);
-        CommandEX.searchMusicApi(sender, name, newArgs, false);
+        CommandEX.searchMusicApi(sender, name, newArgs);
     }
 
     @Override

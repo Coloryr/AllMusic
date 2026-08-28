@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.server.core.command.sub;
 
 import com.coloryr.allmusic.server.core.AllMusic;
+import com.coloryr.allmusic.server.core.IMusicApi;
 import com.coloryr.allmusic.server.core.command.ACommand;
 
 public class CommandReload extends ACommand {

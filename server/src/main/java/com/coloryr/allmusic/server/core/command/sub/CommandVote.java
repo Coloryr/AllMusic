@@ -16,6 +16,8 @@ public class CommandVote extends ACommand {
                 !AllMusic.side.checkPermission(sender, PermissionList.PERMISSION_VOTE)) {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.noPermission);
             return;
+        } else if (PlayMusic.fullVoteList()) {
+            AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.err6);
         } else if (PlayMusic.getListSize() == 0 && PlayMusic.getIdleListSize() == 0) {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().musicPlay.emptyPlay);
         } else if (PlayMusic.nowPlayMusic == null) {
@@ -32,7 +34,7 @@ public class CommandVote extends ACommand {
                     return;
                 }
                 PlayMusic.removeVote(name, VoteItem.VoteType.NEXT);
-                AllMusic.side.sendMessage(name, AllMusic.getMessage().push.cancel1);
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.cancel1);
             } else {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.error);
             }
@@ -41,9 +43,8 @@ public class CommandVote extends ACommand {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.error);
             return;
         } else {
-            String player = name.toLowerCase(Locale.ROOT);
-            VoteItem item = new VoteItem(PlayMusic.nowPlayMusic.getApi(), PlayMusic.nowPlayMusic.getId(), player, VoteItem.VoteType.NEXT);
-            item.votePlayer.add(player);
+            VoteItem item = new VoteItem(PlayMusic.nowPlayMusic.getApi(), PlayMusic.nowPlayMusic.getId(), name, VoteItem.VoteType.NEXT);
+            item.votePlayer.add(name.toLowerCase(Locale.ROOT));
 
             if (PlayMusic.startVote(item)) {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.doVote);

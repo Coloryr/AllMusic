@@ -5,6 +5,7 @@ import com.coloryr.allmusic.server.core.IMusicApi;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -12,8 +13,11 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 public class MusicApiLoader {
+    private static final byte VERSION = '2';
+
     public static List<IMusicApi> loadFromDirectory(File dir) {
         List<IMusicApi> instances = new ArrayList<>();
         if (!dir.exists() || !dir.isDirectory()) {
@@ -34,6 +38,23 @@ public class MusicApiLoader {
         List<IMusicApi> instances = new ArrayList<>();
 
         try (JarFile jar = new JarFile(jarFile)) {
+            ZipEntry entry1 = jar.getEntry("version");
+
+            if (entry1 == null) {
+                AllMusic.log.data("<light_purple>[AllMusic]<red>旧版API，跳过加载：" + jarFile.getName());
+                return instances;
+            }
+
+            InputStream stream = jar.getInputStream(entry1);
+            int size = stream.available();
+            byte[] temp = new byte[size];
+            stream.read(temp);
+
+            if (temp[0] != VERSION) {
+                AllMusic.log.data("<light_purple>[AllMusic]<red>旧版API，跳过加载：" + jarFile.getName());
+                return instances;
+            }
+
             Enumeration<JarEntry> entries = jar.entries();
             List<String> classNames = new ArrayList<>();
 

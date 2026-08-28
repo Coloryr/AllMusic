@@ -22,10 +22,6 @@ public class PlayerAddMusicObj {
      */
     public String[] args;
     /**
-     * 是否是默认点歌方式
-     */
-    public boolean isDefault;
-    /**
      * 歌曲Url
      */
     public String url;

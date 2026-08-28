@@ -111,6 +111,13 @@ public class PlayMusic {
     public static boolean startVote(VoteItem vote) {
         String id = vote.getId();
         String api = vote.getApi();
+
+        if (PlayMusic.vote != null && PlayMusic.vote.getType() == vote.getType()
+                && PlayMusic.vote.getApi().equalsIgnoreCase(vote.getApi())
+                && PlayMusic.vote.getId().equalsIgnoreCase(vote.getId())) {
+            return false;
+        }
+
         for (VoteItem item : voteList) {
             if (item.getId().equalsIgnoreCase(id) && item.getApi().equalsIgnoreCase(api)) {
                 return false;
@@ -157,6 +164,16 @@ public class PlayMusic {
 
         vote = null;
     }
+
+    public static List<VoteItem> cloneVoteList() {
+        return new ArrayList<>(voteList);
+    }
+
+    public static void removeVote(VoteItem vote) {
+        voteList.remove(vote);
+    }
+
+    public static boolean fullVoteList() { return voteList.size() >= AllMusic.getConfig().vote.voteListSize; }
 
     public static void voteTick() {
         voteTime--;
@@ -231,7 +248,7 @@ public class PlayMusic {
                 if (obj != null) {
                     IMusicApi api = AllMusic.MUSIC_APIS.get(obj.api);
                     if (api != null) {
-                        addMusic(obj.sender, obj.id, api, obj.name, obj.isDefault);
+                        addMusic(obj.sender, obj.id, api, obj.name, false);
                     }
                 }
                 Thread.sleep(10);

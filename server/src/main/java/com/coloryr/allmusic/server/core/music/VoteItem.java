@@ -1,5 +1,7 @@
 package com.coloryr.allmusic.server.core.music;
 
+import com.coloryr.allmusic.server.core.objs.music.SongInfoObj;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,5 +38,10 @@ public class VoteItem {
         this.id = id;
         this.type = type;
         this.voteSender = voteSender;
+    }
+
+    public boolean like(SongInfoObj info) {
+        return api.equalsIgnoreCase(info.getApi())
+                && id.equalsIgnoreCase(info.getId());
     }
 }

@@ -26,7 +26,10 @@ public class CommandSearch extends ACommand {
             return;
         }
 
+        String[] newArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+
         AllMusic.side.sendMessage(sender, AllMusic.getMessage().search.startSearch);
-        CommandEX.searchMusic(sender, name, args, false);
+        CommandEX.searchMusic(sender, name, newArgs);
     }
 }

@@ -15,6 +15,7 @@ public class VoteObj {
     public String err3;
     public String err4;
     public String err5;
+    public String err6;
     public String cancel;
     public String cancel1;
     public String list;
@@ -53,6 +54,8 @@ public class VoteObj {
             return true;
         if (err5 == null)
             return true;
+        if (err6 == null)
+            return true;
         if (cancel == null)
             return true;
         if (cancel1 == null)
@@ -89,6 +92,8 @@ public class VoteObj {
             err4 = "<light_purple>[AllMusic]<red>当前没有进行中的投票";
         if (err5 == null)
             err5 = "<light_purple>[AllMusic]<red>你已经通过了当前投票";
+        if (err6 == null)
+            err6 = "<light_purple>[AllMusic]<red>投票队列已满，无法发起投票";
         if (next == null)
             next = "<light_purple>[AllMusic]<yellow>已切换到播放下一首歌";
         if (cancel == null)

@@ -4,12 +4,17 @@ import com.coloryr.allmusic.server.core.music.LyricSave;
 import com.coloryr.allmusic.server.core.objs.music.SearchPageObj;
 import com.coloryr.allmusic.server.core.objs.music.SongInfoObj;
 
+import java.io.File;
+import java.util.List;
+
 public interface IMusicApi {
+    void reload(File path);
+
     String getId();
 
     SongInfoObj getMusic(String id, String player, boolean isList);
 
-    SearchPageObj search(String[] args, boolean isDefault);
+    SearchPageObj search(String[] args);
 
     void setList(String id, Object sender);
 
@@ -22,4 +27,8 @@ public interface IMusicApi {
     String getMusicId(String arg);
 
     boolean checkId(String id);
+
+    void command(Object sender, String name, String[] args);
+
+    List<String> tab(Object sender, String name, String[] args);
 }

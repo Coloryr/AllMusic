@@ -33,10 +33,10 @@ public class MusicSearch {
                         AllMusic.side.sendMessageTask(obj.sender, AllMusic.getMessage().musicPlay.error2);
                         continue;
                     }
-                    SearchPageObj search = api.search(obj.args, obj.isDefault);
+                    SearchPageObj search = api.search(obj.args);
                     if (search == null)
                         AllMusic.side.sendMessageTask(obj.sender, AllMusic.getMessage().search
-                                .cantSearch.replace(ARG.name, obj.isDefault ? obj.args[0] : obj.args[1]));
+                                .cantSearch.replace(ARG.name, obj.args[0]));
                     else {
                         AllMusic.side.sendMessageTask(obj.sender, AllMusic.getMessage().search.res);
                         addSearch(obj.name, search);

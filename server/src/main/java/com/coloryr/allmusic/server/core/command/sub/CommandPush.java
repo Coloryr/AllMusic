@@ -23,8 +23,12 @@ public class CommandPush extends ACommand {
         }
         if (PlayMusic.getListSize() == 0 && PlayMusic.getIdleListSize() == 0) {
             AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().musicPlay.emptyPlay));
+            return;
+        } else if (PlayMusic.fullVoteList()) {
+            AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.err6);
+            return;
         }
-        SongInfoObj music = null;
+        SongInfoObj music;
         if (args.length == 1) {
             music = PlayMusic.findPlayerMusic(name);
             if (music == null) {

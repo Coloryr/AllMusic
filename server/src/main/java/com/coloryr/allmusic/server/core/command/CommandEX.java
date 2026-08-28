@@ -73,9 +73,8 @@ public class CommandEX {
      * @param sender    发送者
      * @param name      用户名
      * @param args      参数
-     * @param isDefault 是否是默认点歌方式
      */
-    public static void searchMusic(Object sender, String name, String[] args, boolean isDefault) {
+    public static void searchMusic(Object sender, String name, String[] args) {
 
         String apiname = AllMusic.getConfig().defaultApi;
 
@@ -88,7 +87,6 @@ public class CommandEX {
         obj.sender = sender;
         obj.name = name;
         obj.args = args;
-        obj.isDefault = isDefault;
         obj.api = apiname;
 
         if (AllMusic.side.onMusicAdd(sender, obj)) {
@@ -105,9 +103,8 @@ public class CommandEX {
      * @param sender    发送者
      * @param name      用户名
      * @param args      参数
-     * @param isDefault 是否是默认点歌方式
      */
-    public static void searchMusicApi(Object sender, String name, String[] args, boolean isDefault) {
+    public static void searchMusicApi(Object sender, String name, String[] args) {
         if (args == null || args.length < 2) {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().musicPlay.error2);
             return;
@@ -119,12 +116,14 @@ public class CommandEX {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().musicPlay.error2);
             return;
         }
+
+        String[] newArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
         
         PlayerAddMusicObj obj = new PlayerAddMusicObj();
         obj.sender = sender;
         obj.name = name;
-        obj.args = args;
-        obj.isDefault = isDefault;
+        obj.args = newArgs;
         obj.api = apiname;
 
         if (AllMusic.side.onMusicAdd(sender, obj)) {
@@ -222,7 +221,6 @@ public class CommandEX {
                     obj.sender = sender;
                     obj.id = musicID;
                     obj.name = name;
-                    obj.isDefault = false;
                     obj.api = api;
 
                     if (AllMusic.side.onMusicAdd(sender, obj)) {
@@ -280,7 +278,7 @@ public class CommandEX {
             else {
                 switch (AllMusic.getConfig().defaultAddMusic) {
                     case 1:
-                        searchMusic(sender, name, args, true);
+                        searchMusic(sender, name, args);
                         break;
                     case 0:
                     default:

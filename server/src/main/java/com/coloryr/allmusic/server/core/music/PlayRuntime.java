@@ -76,23 +76,33 @@ public class PlayRuntime {
 
     private static void checkVoteNext() {
         VoteItem vote = PlayMusic.getVote();
-        if (vote != null && vote.getType() == VoteItem.VoteType.NEXT
-                && vote.getApi().equalsIgnoreCase(PlayMusic.nowPlayMusic.getApi())
-                && vote.getId().equalsIgnoreCase(PlayMusic.nowPlayMusic.getId())) {
+        if (vote != null && vote.getType() == VoteItem.VoteType.NEXT && vote.like(PlayMusic.nowPlayMusic)) {
             AllMusic.side.broadcastInTask(AllMusic.getMessage().vote.cancel1);
             PlayMusic.removeVote();
+        }
+
+        for (VoteItem item : PlayMusic.cloneVoteList()) {
+            if (item.getType() == VoteItem.VoteType.NEXT && item.like(PlayMusic.nowPlayMusic)) {
+                PlayMusic.removeVote(item);
+            }
         }
     }
 
     private static void checkVotePush() {
         VoteItem vote = PlayMusic.getVote();
         SongInfoObj next = PlayMusic.getNextMusic();
-        if (vote != null && next != null) {
-            if (vote.getType() == VoteItem.VoteType.PUSH
-                    && vote.getId().equalsIgnoreCase(next.getId())
-                    && vote.getApi().equalsIgnoreCase(next.getApi())) {
-                PlayMusic.removeVote();
-                AllMusic.side.broadcastInTask(AllMusic.getMessage().push.cancel2);
+        if (next != null) {
+            if (vote != null) {
+                if (vote.getType() == VoteItem.VoteType.PUSH && vote.like(next)) {
+                    PlayMusic.removeVote();
+                    AllMusic.side.broadcastInTask(AllMusic.getMessage().push.cancel2);
+                }
+            }
+
+            for (VoteItem item : PlayMusic.cloneVoteList()) {
+                if (item.getType() == VoteItem.VoteType.PUSH && item.like(next)) {
+                    PlayMusic.removeVote(item);
+                }
             }
         }
     }

@@ -582,5 +582,14 @@ public class PlayMusic {
     public static void clearNowPlayer() {
         nowPlayPlayer.clear();
     }
+
+    public static SongInfoObj getNextMusic() {
+        synchronized (playList) {
+            if (playList.isEmpty()) {
+                return null;
+            }
+            return playList.get(0);
+        }
+    }
 }
 

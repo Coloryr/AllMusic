@@ -60,13 +60,7 @@ public class PlayRuntime {
     private static void clear() {
         isPlay = false;
 
-        VoteItem vote = PlayMusic.getVote();
-        if (vote != null && vote.getType() == VoteItem.VoteType.NEXT
-                && vote.getApi().equalsIgnoreCase(PlayMusic.nowPlayMusic.getApi())
-                && vote.getId().equalsIgnoreCase(PlayMusic.nowPlayMusic.getId())) {
-            AllMusic.side.broadcastInTask(AllMusic.getMessage().vote.cancel1);
-            PlayMusic.removeVote();
-        }
+        checkVoteNext();
 
         PlayMusic.musicNowTime = 0;
         PlayMusic.musicAllTime = 0;
@@ -80,6 +74,28 @@ public class PlayRuntime {
         HudUtils.sendHudLyricData();
     }
 
+    private static void checkVoteNext() {
+        VoteItem vote = PlayMusic.getVote();
+        if (vote != null && vote.getType() == VoteItem.VoteType.NEXT
+                && vote.getApi().equalsIgnoreCase(PlayMusic.nowPlayMusic.getApi())
+                && vote.getId().equalsIgnoreCase(PlayMusic.nowPlayMusic.getId())) {
+            AllMusic.side.broadcastInTask(AllMusic.getMessage().vote.cancel1);
+            PlayMusic.removeVote();
+        }
+    }
+
+    private static void checkVotePush() {
+        VoteItem vote = PlayMusic.getVote();
+        SongInfoObj next = PlayMusic.getNextMusic();
+        if (vote != null && next != null) {
+            if (vote.getType() == VoteItem.VoteType.PUSH
+                    && vote.getId().equalsIgnoreCase(next.getId())
+                    && vote.getApi().equalsIgnoreCase(next.getApi())) {
+                PlayMusic.removeVote();
+                AllMusic.side.broadcastInTask(AllMusic.getMessage().push.cancel2);
+            }
+        }
+    }
 
     /**
      * 歌曲时间定时器
@@ -118,14 +134,6 @@ public class PlayRuntime {
 
     public static int getMiniVote() {
         return Math.min(AllMusic.getConfig().vote.minVote, AllMusic.side.getPlayers().size());
-    }
-
-    public static boolean checkMusic(String id, String api) {
-        if (PlayMusic.nowPlayMusic.getId().equalsIgnoreCase(id)
-                && PlayMusic.nowPlayMusic.getApi().equalsIgnoreCase(api)) {
-            return true;
-        }
-        return PlayMusic.getMusic(id, api) != null;
     }
 
     private static void sendVoteInfo(boolean timeout) {
@@ -228,6 +236,8 @@ public class PlayRuntime {
                         AllMusic.side.broadcastInTask(AllMusic.getMessage().musicPlay.cancel);
                         continue;
                     }
+
+                    checkVotePush();
 
                     IMusicApi api = AllMusic.MUSIC_APIS.get(PlayMusic.nowPlayMusic.getApi());
 

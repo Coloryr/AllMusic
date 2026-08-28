@@ -12,6 +12,7 @@ public class PushObj {
     public String pushErr;
     public String cancel;
     public String cancel1;
+    public String cancel2;
     public String err1;
     public String err3;
     public String err4;
@@ -53,6 +54,8 @@ public class PushObj {
             return true;
         if (cancel1 == null)
             return true;
+        if (cancel2 == null)
+            return true;
         return doPush == null;
     }
 
@@ -85,5 +88,7 @@ public class PushObj {
             cancel = "<light_purple>[AllMusic]<yellow>插歌投票已被发起者取消";
         if (cancel1 == null)
             cancel1 = "<light_purple>[AllMusic]<yellow>已删除你发起的投票";
+        if (cancel2 == null)
+            cancel2 = "<light_purple>[AllMusic]<yellow>下一首歌就是投票歌曲，已取消投票";
     }
 }

@@ -45,7 +45,7 @@ public class CommandPush extends ACommand {
             if (PlayMusic.startVote(item)) {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
             } else {
-                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err3);
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err5);
             }
 
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
@@ -75,7 +75,7 @@ public class CommandPush extends ACommand {
                 if (PlayMusic.startVote(item)) {
                     AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
                 } else {
-                    AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err3);
+                    AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err5);
                 }
 
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);

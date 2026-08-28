@@ -8,7 +8,6 @@ public class VoteObj {
     public String bq2;
     public String agree;
     public String bqAgree;
-    public String arAgree;
     public String timeOut;
     public String next;
     public String err1;
@@ -41,8 +40,6 @@ public class VoteObj {
         if (agree == null)
             return true;
         if (bqAgree == null)
-            return true;
-        if (arAgree == null)
             return true;
         if (timeOut == null)
             return true;
@@ -80,14 +77,12 @@ public class VoteObj {
             agree = "<light_purple>[AllMusic]<yellow>你同意切歌";
         if (bqAgree == null)
             bqAgree = "<light_purple>[AllMusic]<yellow>" + ARG.player + "同意投票，共有" + ARG.count + "名玩家同意投票，需要至少" + ARG.countAll + "名玩家同意才会通过。";
-        if (arAgree == null)
-            arAgree = "<light_purple>[AllMusic]<yellow>你已申请切歌";
         if (timeOut == null)
             timeOut = "<light_purple>[AllMusic]<yellow>投票时间结束，共有" + ARG.count + "同意，需要" + ARG.countAll + "才能通过";
         if (err1 == null)
             err1 = "<light_purple>[AllMusic]<red>你没有发起过切歌投票";
         if (err3 == null)
-            err3 = "<light_purple>[AllMusic]<red>这首歌已经在投票中了";
+            err3 = "<light_purple>[AllMusic]<red>切歌投票已经在进行中了";
         if (err4 == null)
             err4 = "<light_purple>[AllMusic]<red>当前没有进行中的投票";
         if (err5 == null)

@@ -141,9 +141,6 @@ public class AllMusicPlayer extends InputStream {
         if (isChat) {
             temp *= 0.5F;
         }
-        if (temp < 0.05F) {
-            temp = 0.05F;
-        }
         if (now != temp) {
             AL10.alSourcef(index, AL10.AL_GAIN, temp);
         }

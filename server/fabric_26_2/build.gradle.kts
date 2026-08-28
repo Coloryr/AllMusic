@@ -26,9 +26,6 @@ tasks {
     shadowJar {
         archiveFileName.set("[fabric-26.2]AllMusic_Server-${project.version}.jar")
         destinationDirectory.set(file("${parent!!.projectDir}/../build"))
-
-//        relocate("net.kyori", "com.coloryr.allmusic.libs.net.kyori")
-//        relocate("com.google.gson", "com.coloryr.allmusic.libs.com.google.gson")
     }
 
     build {

@@ -6,13 +6,9 @@ public class FunConfigObj {
 
     public static FunConfigObj make() {
         FunConfigObj obj = new FunConfigObj();
-        obj.init();
+        obj.rain = true;
+        obj.rainRate = 10;
 
         return obj;
-    }
-
-    public void init() {
-        rain = true;
-        rainRate = 10;
     }
 }

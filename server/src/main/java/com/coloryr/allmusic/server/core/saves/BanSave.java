@@ -32,8 +32,11 @@ public class BanSave {
     }
 
     private static void banCheck() {
-        if (ban == null || ban.check()) {
+        if (ban == null) {
             ban = BanObj.make();
+            AllMusic.log.data("<light_purple>[AllMusic]<red>配置文件ban.json错误，已覆盖");
+            saveBan();
+        } else if (ban.check()) {
             AllMusic.log.data("<light_purple>[AllMusic]<red>配置文件ban.json错误，已覆盖");
             saveBan();
         }

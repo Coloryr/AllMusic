@@ -21,8 +21,29 @@ public class BanObj {
     }
 
     public boolean check() {
-        return banPlayers == null || banServer == null || banMusics == null || mutePlayers == null
-                || muteListPlayers == null;
+        boolean saveConfig = false;
+        if (banPlayers == null) {
+            banPlayers = new HashSet<>();
+            saveConfig = true;
+        }
+        if (banServer == null) {
+            banServer = new HashSet<>();
+            saveConfig = true;
+        }
+        if (mutePlayers == null) {
+            mutePlayers = new HashSet<>();
+            saveConfig = true;
+        }
+        if (muteListPlayers == null) {
+            muteListPlayers = new HashSet<>();
+            saveConfig = true;
+        }
+        if (banMusics == null) {
+            banMusics = new HashMap<>();
+            saveConfig = true;
+        }
+
+        return saveConfig;
     }
 
 

@@ -125,7 +125,7 @@ public class ConfigObj {
             saveConfig = true;
             adminList = new HashSet<>();
         }
-        if (economy == null || economy.check()) {
+        if (economy == null) {
             saveConfig = true;
             economy = EconomyObj.make();
         }

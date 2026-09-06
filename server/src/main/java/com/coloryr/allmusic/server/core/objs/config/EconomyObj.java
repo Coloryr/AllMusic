@@ -6,18 +6,8 @@ public class EconomyObj {
 
     public static EconomyObj make() {
         EconomyObj obj = new EconomyObj();
-        obj.init();
-
+        obj.backend = "server1";
+        obj.vault = true;
         return obj;
-    }
-
-    public boolean check() {
-
-        return false;
-    }
-
-    public void init() {
-        backend = "Server1";
-        vault = true;
     }
 }

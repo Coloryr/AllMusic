@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.server.core.objs.config;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,11 @@ public class MusicListObj {
     }
 
     public boolean check() {
-        return musics == null;
+        boolean saveConfig = false;
+        if (musics == null) {
+            musics = new HashMap<>();
+            saveConfig = true;
+        }
+        return saveConfig;
     }
 }

@@ -166,6 +166,6 @@ public class HelpNormalObj {
         if (join == null)
             join = "<light_purple>[AllMusic]<yellow>/music join 重新播放当前歌曲";
         if (agree == null)
-            join = "<light_purple>[AllMusic]<yellow>/music agree 同意当前的投票";
+            agree = "<light_purple>[AllMusic]<yellow>/music agree 同意当前的投票";
     }
 }

@@ -12,7 +12,7 @@ import java.util.Locale;
 import java.util.Set;
 
 public class BanSave {
-    private static BanObj ban = new BanObj();
+    private static BanObj ban = BanObj.make();
     private static File banFile;
 
     public static boolean haveBanPlayer(String player) {
@@ -31,11 +31,14 @@ public class BanSave {
         }
     }
 
-    private static void banCheck() {
-        if (ban == null || ban.check()) {
-            ban = BanObj.make();
+    private static void banCheck(BanObj newBan) {
+        if (newBan == null || newBan.check()) {
+            newBan = BanObj.make();
+            ban = newBan;
             AllMusic.log.data("<light_purple>[AllMusic]<red>配置文件ban.json错误，已覆盖");
             saveBan();
+        } else {
+            ban = newBan;
         }
     }
 
@@ -58,10 +61,10 @@ public class BanSave {
         InputStreamReader reader = new InputStreamReader(
                 Files.newInputStream(banFile.toPath()), StandardCharsets.UTF_8);
         BufferedReader bf = new BufferedReader(reader);
-        ban = AllMusic.gson.fromJson(bf, BanObj.class);
+        BanObj newBan = AllMusic.gson.fromJson(bf, BanObj.class);
         bf.close();
         reader.close();
-        banCheck();
+        banCheck(newBan);
     }
 
     public static void addBanMusic(String music, String api) {

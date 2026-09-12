@@ -51,6 +51,9 @@ tasks {
         }
     }
 
+    // loom 的 jar-in-jar 嵌套默认只挂在 jar 任务上，需要手动接到 shadowJar
+    loom.nestJars(named("shadowJar", Jar::class), configurations.getByName("include"))
+
     shadowJar {
         archiveFileName.set("[fabric-26.2]AllMusic-${project.version}.jar")
         destinationDirectory.set(file("${parent!!.projectDir}/../build"))

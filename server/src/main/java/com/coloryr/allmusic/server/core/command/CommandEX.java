@@ -186,6 +186,11 @@ public class CommandEX {
      * @param arg    参数
      */
     public static void addMusic(Object sender, String name, String api, String arg) {
+        if (PlayMusic.getListSize() >= AllMusic.getConfig().limit.maxPlayList) {
+            AllMusic.side.sendMessageTask(sender, AllMusic.getMessage().addMusic.listFull);
+            return;
+        }
+
         String musicID;
 
         IMusicApi api1 = AllMusic.MUSIC_APIS.get(api);
@@ -197,9 +202,7 @@ public class CommandEX {
         musicID = api1.getMusicId(arg);
 
         if (api1.checkId(musicID)) {
-            if (PlayMusic.getListSize() >= AllMusic.getConfig().limit.maxPlayerList) {
-                AllMusic.side.sendMessageTask(sender, AllMusic.getMessage().addMusic.listFull);
-            } else if (BanSave.checkBanMusic(musicID, api)) {
+            if (BanSave.checkBanMusic(musicID, api)) {
                 AllMusic.side.sendMessageTask(sender, AllMusic.getMessage().addMusic.banMusic);
             } else if (PlayMusic.haveMusic(musicID, api)) {
                 AllMusic.side.sendMessageTask(sender, AllMusic.getMessage().addMusic.existMusic);

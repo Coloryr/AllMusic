@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "com.coloryr.allmusic.client.mixins",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "GuiShow",
+    "QuitServer",
+    "Register",
+    "SoundEvent",
+    "Tick"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

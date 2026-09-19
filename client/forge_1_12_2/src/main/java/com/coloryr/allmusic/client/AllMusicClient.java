@@ -127,7 +127,8 @@ public class AllMusicClient implements AllMusicBridge {
     }
 
     public float getVolume() {
-        return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS);
+        return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS)
+                * Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.MASTER);
     }
 
     @Override

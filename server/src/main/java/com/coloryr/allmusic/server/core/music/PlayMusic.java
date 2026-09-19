@@ -482,7 +482,7 @@ public class PlayMusic {
      */
     private static boolean checkDeep(MusicObj music) {
         for (MusicObj obj : deep) {
-            if (Objects.equals(obj.id, music.id) && obj.api == music.api) {
+            if (Objects.equals(obj.id, music.id) && Objects.equals(obj.api, music.api)) {
                 return true;
             }
         }

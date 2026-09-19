@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "allmusic",
+  "version": "${version}",
+  "name": "AllMusic",
+  "description": "AllMusic Mod",
+  "authors": [
+    "Color_yr"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Coloryr/AllMusic",
+    "sources": "https://github.com/Coloryr/AllMusic"
+  },
+  "license": "GPL-3.0",
+  "icon": "assets/allmusic/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.coloryr.allmusic.comm.AllMusicInit",
+      "com.coloryr.allmusic.server.AllMusicServer"
+    ],
+    "client": [
+      "com.coloryr.allmusic.client.AllMusicClient"
+    ],
+    "voicechat": [
+      "com.coloryr.allmusic.client.others.VoiceChat"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "allmusic_client.mixins.json",
+      "environment": "client"
+    },
+    {
+      "config": "allmusic_server.mixins.json",
+      "environment": "server"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "fabric-api": "*",
+    "minecraft": ">=26.2",
+    "adventure-platform-fabric": ">=7.0.0"
+  },
+  "suggests": {
+    "modernui": "*",
+    "voicechat_api": "*"
+  }
+}

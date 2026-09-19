@@ -128,7 +128,7 @@ public class AllMusicClient implements AllMusicBridge, IPayloadHandler<MusicCode
     }
 
     public float getVolume() {
-        return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
+        return Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.RECORDS);
     }
 
     @Override

@@ -66,7 +66,7 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
     }
 
     public float getVolume() {
-        return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
+        return Minecraft.getInstance().options.getFinalSoundSourceVolume(SoundSource.RECORDS);
     }
 
     @Override

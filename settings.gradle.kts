@@ -14,6 +14,7 @@ include(":client:fabric_1_21_8")
 include(":client:fabric_1_21_11")
 include(":client:fabric_26_1")
 include(":client:fabric_26_2")
+include(":client:fabric_26_3")
 
 include(":client:forge_1_7_10")
 include(":client:forge_1_12_2")
@@ -27,6 +28,7 @@ include(":client:neoforge_1_21_6")
 include(":client:neoforge_1_21_11")
 include(":client:neoforge_26_1")
 include(":client:neoforge_26_2")
+include(":client:neoforge_26_3")
 
 include(":server")
 
@@ -38,6 +40,7 @@ include(":server:fabric_1_21_6")
 include(":server:fabric_1_21_11")
 include(":server:fabric_26_1")
 include(":server:fabric_26_2")
+include(":server:fabric_26_3")
 
 include(":server:forge_1_7_10")
 include(":server:forge_1_12_2")
@@ -50,6 +53,7 @@ include(":server:neoforge_1_21_6")
 include(":server:neoforge_1_21_11")
 include(":server:neoforge_26_1")
 include(":server:neoforge_26_2")
+include(":server:neoforge_26_3")
 
 include(":server:spigot")
 include(":server:paper")
@@ -68,11 +72,15 @@ include(":onejar:fabric_1_21_6")
 include(":onejar:fabric_1_21_11")
 include(":onejar:fabric_26_1")
 include(":onejar:fabric_26_2")
+include(":onejar:fabric_26_3")
+
 include(":onejar:neoforge_1_21")
 include(":onejar:neoforge_1_21_4")
 include(":onejar:neoforge_1_21_6")
 include(":onejar:neoforge_1_21_11")
 include(":onejar:neoforge_26_1")
+include(":onejar:neoforge_26_2")
+include(":onejar:neoforge_26_3")
 
 pluginManagement {
     repositories {

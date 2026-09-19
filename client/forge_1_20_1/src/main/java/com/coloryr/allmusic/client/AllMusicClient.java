@@ -118,7 +118,8 @@ public class AllMusicClient implements AllMusicBridge {
     }
 
     public float getVolume() {
-        return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS);
+        return Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.RECORDS)
+                * Minecraft.getInstance().options.getSoundSourceVolume(SoundSource.MASTER);
     }
 
     @SubscribeEvent

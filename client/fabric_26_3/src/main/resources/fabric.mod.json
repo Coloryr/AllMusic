@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "allmusic_client",
+  "version": "${version}",
+  "name": "AllMusic Client",
+  "description": "AllMusic Client Mod",
+  "authors": [
+    "Color_yr"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Coloryr/AllMusic",
+    "sources": "https://github.com/Coloryr/AllMusic"
+  },
+  "license": "GPL-3.0",
+  "icon": "assets/allmusic_client/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.coloryr.allmusic.comm.AllMusicInit"
+    ],
+    "client": [
+      "com.coloryr.allmusic.client.AllMusicClient"
+    ],
+    "voicechat": [
+      "com.coloryr.allmusic.client.others.VoiceChat"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "allmusic_client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.3",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "voicechat_api": "*"
+  }
+}

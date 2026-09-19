@@ -145,7 +145,7 @@ public class AllMusic implements AllMusicBridge {
     }
 
     @Override
-    public TextFrameBuffer makeTextRender(String name) {
+    public TextFrameBuffer<?> makeTextRender(String name) {
         return new CoreRenderTarget(name);
     }
 
@@ -218,7 +218,8 @@ public class AllMusic implements AllMusicBridge {
     }
 
     public float getVolume() {
-        return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS);
+        return Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.RECORDS)
+                * Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.MASTER);
     }
 
     @Override

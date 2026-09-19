@@ -197,9 +197,13 @@ public class AllMusicPlayer extends InputStream {
 
                 if (head[0] == 0 && head[1] == 0 && head[2] == 0 && head[3] == 0x1c) {
                     decoder = new M4ADecoder(this);
-                } else if (head[0] == 'I' && head[1] == 'D' && head[2] == '3') {
-                    decoder = new Mp3Decoder(this);
-                } else if (head[0] == (byte) 0xFF && head[1] == (byte) 0xFB) {
+                } else if ((head[0] == 'I' && head[1] == 'D' && head[2] == '3')
+                        || (head[0] == (byte) 0xFF && head[1] == (byte) 0xFB)
+                        || (head[0] == (byte) 0xFF && head[1] == (byte) 0xFA)
+                        || (head[0] == (byte) 0xFF && head[1] == (byte) 0xF3)
+                        || (head[0] == (byte) 0xFF && head[1] == (byte) 0xF2)
+                        || (head[0] == (byte) 0xFF && head[1] == (byte) 0xE3)
+                        || (head[0] == (byte) 0xFF && head[1] == (byte) 0xE2)) {
                     decoder = new Mp3Decoder(this);
                 } else {
                     decoder = new OggDecoder(this);

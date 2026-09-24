@@ -153,7 +153,7 @@ public class AllMusic {
                 return true;
             if (!checkPlay)
                 return false;
-            return PlayMusic.containNowPlay(name);
+            return !PlayMusic.containNowPlay(name);
         } catch (NoSuchElementException e) {
             return true;
         }
@@ -179,7 +179,7 @@ public class AllMusic {
                 return true;
             if (!checkPlay)
                 return false;
-            return PlayMusic.containNowPlay(name);
+            return !PlayMusic.containNowPlay(name);
         } catch (NoSuchElementException e) {
             return true;
         }
@@ -388,6 +388,9 @@ public class AllMusic {
                 return;
             }
             if (BanSave.checkMuteListPlayer(player1)) {
+                return;
+            }
+            if (PlayMusic.containNowPlay(player1)) {
                 return;
             }
 

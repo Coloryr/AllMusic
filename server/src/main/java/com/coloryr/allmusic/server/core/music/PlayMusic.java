@@ -570,7 +570,7 @@ public class PlayMusic {
      */
     public static boolean containNowPlay(String player) {
         player = player.toLowerCase();
-        return !nowPlayPlayer.contains(player);
+        return nowPlayPlayer.contains(player);
     }
 
     /**

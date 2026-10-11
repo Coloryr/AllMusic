@@ -108,7 +108,7 @@ public class SideNeoForge extends BaseSide {
     public void broadcast(Component message) {
         for (ServerPlayer player : AllMusicServer.server.getPlayerList().getPlayers()) {
             if (!AllMusic.isSkip(player.getName().getString(), null, false)) {
-                AllMusicServer.audiences.audience(player).sendActionBar(message);
+                AllMusicServer.audiences.audience(player).sendMessage(message);
             }
         }
     }
@@ -116,7 +116,7 @@ public class SideNeoForge extends BaseSide {
     @Override
     public void sendMessage(Object obj, Component message) {
         if (obj instanceof CommandSourceStack source) {
-            AllMusicServer.audiences.audience(source).sendActionBar(message);
+            AllMusicServer.audiences.audience(source).sendMessage(message);
         }
     }
 

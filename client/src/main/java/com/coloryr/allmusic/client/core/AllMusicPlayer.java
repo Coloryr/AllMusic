@@ -3,11 +3,13 @@ package com.coloryr.allmusic.client.core;
 import com.coloryr.allmusic.client.core.objs.PlayTaskObj;
 import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
+import com.coloryr.allmusic.client.core.player.decoder.flac.FlacDecoder;
 import com.coloryr.allmusic.client.core.player.decoder.m4a.M4ADecoder;
 import com.coloryr.allmusic.client.core.player.decoder.mp3.Mp3Decoder;
 import com.coloryr.allmusic.client.core.player.decoder.ogg.OggDecoder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.io.CloseMode;
 import org.lwjgl.BufferUtils;
@@ -41,6 +43,7 @@ public class AllMusicPlayer extends InputStream {
     private int index = -1;
     private final IntBuffer source;
     private long local;
+    private long contentLength = -1;
     private boolean isRun;
     private boolean isChat;
     private int chatCount = 0;
@@ -85,6 +88,7 @@ public class AllMusicPlayer extends InputStream {
 
     public void connect() throws IOException {
         streamClose();
+        contentLength = -1;
         HttpGet request = new HttpGet(nowTask.url);
         request.setHeader("Range", "bytes=" + local + "-");
         response = AllMusicCore.client.execute(request);
@@ -95,6 +99,20 @@ public class AllMusicPlayer extends InputStream {
         HttpEntity entity = response.getEntity();
         if (entity == null) {
             throw new IOException("Response entity is null");
+        }
+        Header contentRange = response.getFirstHeader("Content-Range");
+        if (contentRange != null) {
+            String value = contentRange.getValue();
+            int slash = value.lastIndexOf('/');
+            if (slash >= 0 && slash + 1 < value.length()) {
+                try {
+                    contentLength = Long.parseLong(value.substring(slash + 1).trim());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+        if (contentLength < 0 && local == 0) {
+            contentLength = entity.getContentLength();
         }
         content = new BufferedInputStream(entity.getContent());
     }
@@ -205,6 +223,8 @@ public class AllMusicPlayer extends InputStream {
                         || (head[0] == (byte) 0xFF && head[1] == (byte) 0xE3)
                         || (head[0] == (byte) 0xFF && head[1] == (byte) 0xE2)) {
                     decoder = new Mp3Decoder(this);
+                } else if (head[0] == 'f' && head[1] == 'L' && head[2] == 'a' && head[3] == 'C') {
+                    decoder = new FlacDecoder(this);
                 } else {
                     decoder = new OggDecoder(this);
                 }
@@ -431,5 +451,14 @@ public class AllMusicPlayer extends InputStream {
         streamClose();
         this.local = local;
         connect();
+    }
+
+    /**
+     * Returns the total number of bytes of the resource currently being played, or -1 if the
+     * server did not report it. This is used to estimate byte positions when seeking in formats
+     * that do not carry their own seek table.
+     */
+    public long getContentLength() {
+        return contentLength;
     }
 }

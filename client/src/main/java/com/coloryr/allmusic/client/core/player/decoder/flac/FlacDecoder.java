@@ -17,11 +17,11 @@
 
 package com.coloryr.allmusic.client.core.player.decoder.flac;
 
-import com.coloryr.allmusic.client.core.AllMusicCore;
 import com.coloryr.allmusic.client.core.AllMusicPlayer;
 import com.coloryr.allmusic.client.core.player.decoder.BuffPack;
 import com.coloryr.allmusic.client.core.player.decoder.IDecoder;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -44,7 +44,7 @@ import java.io.IOException;
  * dec.readAudioBlock(samples, ...);
  *
  * &#x2F;/ Seek to some position and continue reading
- * dec.seekAndReadAudioBlock(..., samples, ...);
+ * dec.set(60000);
  * dec.readAudioBlock(samples, ...);
  * dec.readAudioBlock(samples, ...);
  *
@@ -56,6 +56,10 @@ import java.io.IOException;
  * @see FlacLowLevelInput
  */
 public final class FlacDecoder implements AutoCloseable, IDecoder {
+
+    // The maximum number of times the byte position is re-estimated while seeking in a stream
+    // that does not contain a seek table.
+    private static final int MAX_SEEK_ATTEMPTS = 8;
 
     private final AllMusicPlayer player;
     /*---- Fields ----*/
@@ -71,6 +75,12 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
     /*---- Methods ----*/
     private int[][] samples;
     private byte[] sampleBytes;
+
+    // Samples that were decoded but not handed out yet. This happens after a seek when the
+    // requested sample lies in the middle of a block: [decodedOffset, decodedOffset +
+    // decodedLength) of every channel still has to be returned by decodeFrame().
+    private int decodedOffset;
+    private int decodedLength;
 
     // Constructs a new FLAC decoder to read the given file.
     // This immediately reads the basic header but not metadata blocks.
@@ -129,11 +139,16 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
     @Override
     public BuffPack decodeFrame() throws Exception {
-        int blockSamples = readAudioBlock(samples, 0);
+        int blockSamples = decodedLength;
+        if (blockSamples == 0) {
+            blockSamples = readAudioBlock(samples, 0);
+            decodedOffset = 0;
+        }
+        decodedLength = 0;
         int sampleBytesLen = 0;
         for (int i = 0; i < blockSamples; i++) {
             for (int ch = 0; ch < streamInfo.numChannels; ch++) {
-                int val = samples[ch][i];
+                int val = samples[ch][decodedOffset + i];
                 if (streamInfo.sampleDepth == 24) {
                     float temp = val / 16777216f;
                     val = (int) (temp * 0x7FFF);
@@ -159,6 +174,8 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
             input.close();
             input = null;
         }
+        decodedOffset = 0;
+        decodedLength = 0;
     }
 
     @Override
@@ -178,6 +195,8 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
         int bytesPerSample = streamInfo.sampleDepth / 8;
         samples = new int[streamInfo.numChannels][65536];
         sampleBytes = new byte[65536 * streamInfo.numChannels * bytesPerSample];
+        decodedOffset = 0;
+        decodedLength = 0;
 
         return true;
     }
@@ -194,6 +213,171 @@ public final class FlacDecoder implements AutoCloseable, IDecoder {
 
     @Override
     public void set(int time) {
-        AllMusicCore.bridge.sendMessage("不支持中间播放");
+        if (input == null || streamInfo == null || frameDec == null) {
+            return;
+        }
+        try {
+            long sample = (long) time * streamInfo.sampleRate / 1000L;
+            if (sample < 0) sample = 0;
+            if (streamInfo.numSamples > 0 && sample >= streamInfo.numSamples) {
+                sample = streamInfo.numSamples - 1;
+            }
+            seekToSample(sample);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*---- Seeking ----*/
+
+    // Seeks to the given sample index (counted from the beginning of the audio stream) and
+    // positions the decoder so that the next decoded block starts at that sample. The stream is
+    // moved with a seek (a range request), so the data before the target is not read or decoded.
+    private void seekToSample(long target) throws IOException {
+        decodedOffset = 0;
+        decodedLength = 0;
+
+        // A seek table maps sample indices to byte positions, so it allows jumping directly to
+        // the closest known frame before the target and decoding only the frames in between.
+        SeekTable.SeekPoint point = findSeekPoint(target);
+        if (point != null) {
+            input.seekTo(metadataEndPos + point.fileOffset);
+            skipSamples(target - point.sampleOffset);
+            return;
+        }
+
+        long length = input.getLength();
+        if (streamInfo.numSamples <= 0 || length <= metadataEndPos) {
+            // The total length of the stream is unknown, so no byte position can be estimated;
+            // fall back to decoding from the beginning of the audio data.
+            input.seekTo(metadataEndPos);
+            skipSamples(target);
+            return;
+        }
+
+        // There is no seek table: estimate the byte position from the average bitrate. Scanning
+        // forward from a position always finds the frame after it, so the position is moved back
+        // by a safety margin to make sure that the frame before the target (or an even earlier
+        // one) is found. If the bitrate is not constant the margin is doubled until it is enough.
+        long pos = estimatePosition(target, streamInfo.numSamples, metadataEndPos, length);
+        long margin = Math.max(65536L, streamInfo.maxFrameSize * 4L);
+        for (int i = 0; i < MAX_SEEK_ATTEMPTS; i++) {
+            pos = Math.max(metadataEndPos, pos - margin);
+            input.seekTo(pos);
+            long frameSample = scanToNextFrame();
+            if (frameSample < 0) {
+                break; // No frame was found, the estimate was too close to the end of the stream
+            }
+            if (frameSample <= target) {
+                skipSamples(target - frameSample);
+                return;
+            }
+            // The frame found is still after the target: back off further and try again.
+            margin = Math.min(margin * 2, Math.max(1L, pos - metadataEndPos));
+        }
+
+        // Decoding from the beginning is always correct, it is only used as a last resort.
+        input.seekTo(metadataEndPos);
+        skipSamples(target);
+    }
+
+    // Returns the seek point with the greatest sample offset that is not after the given sample,
+    // or null if the stream does not contain a usable seek table.
+    private SeekTable.SeekPoint findSeekPoint(long sample) {
+        if (seekTable == null || seekTable.points == null) return null;
+        SeekTable.SeekPoint result = null;
+        for (SeekTable.SeekPoint point : seekTable.points) {
+            if (point == null || point.sampleOffset < 0) continue; // Placeholder point
+            if (point.sampleOffset > sample) continue;
+            if (result == null || point.sampleOffset > result.sampleOffset) result = point;
+        }
+        return result;
+    }
+
+    // Returns the byte position that corresponds to the given sample index, assuming that the
+    // samples are spread evenly over the byte range [start, end). Pure function.
+    private static long estimatePosition(long sample, long totalSamples, long start, long end) {
+        if (sample <= 0 || totalSamples <= 0 || end <= start) return start;
+        long pos = start + (long) ((double) sample / totalSamples * (end - start));
+        if (pos < start) return start;
+        if (pos >= end) return end - 1;
+        return pos;
+    }
+
+    // Scans forward from the current byte position for the next valid FLAC frame header, leaves
+    // the stream at the beginning of that frame, and returns its sample index, or -1 if the end
+    // of the stream was reached. This is used to seek in streams without a seek table.
+    private long scanToNextFrame() throws IOException {
+        long pos = input.getPosition();
+        int previous = -1;
+        while (true) {
+            int current;
+            try {
+                current = input.readByte();
+            } catch (EOFException e) {
+                return -1;
+            }
+            if (current == -1) return -1;
+
+            // The sync code is 14 one-bits followed by a zero reserved bit, so the first two
+            // bytes of a frame are 0xFF and 0xF8 or 0xF9.
+            if (previous == 0xFF && (current & 0xFE) == 0xF8) {
+                long start = pos - 1;
+                if (!input.seekWithinBuffer(start)) input.seekTo(start);
+
+                long index = -1;
+                try {
+                    FrameInfo info = FrameInfo.readFrame(input);
+                    if (info == null) return -1; // Clean end of stream
+                    index = getSampleIndex(info);
+                } catch (DataFormatException e) {
+                    // A false sync code inside a frame; keep searching
+                } catch (EOFException e) {
+                    return -1;
+                }
+
+                if (index >= 0) {
+                    // Rewind so that the frame can be decoded from its very first byte
+                    if (!input.seekWithinBuffer(start)) input.seekTo(start);
+                    return index;
+                }
+
+                // Continue scanning right after the sync code that turned out to be invalid
+                if (!input.seekWithinBuffer(start + 1)) input.seekTo(start + 1);
+                pos = start + 1;
+                previous = -1;
+                continue;
+            }
+
+            previous = current;
+            pos++;
+        }
+    }
+
+    // Returns the absolute sample index of the given frame header, or -1 if the header does not
+    // carry one (which the FLAC format guarantees, so this should not happen).
+    private long getSampleIndex(FrameInfo info) {
+        if (info.sampleOffset >= 0) return info.sampleOffset;
+        if (info.frameIndex >= 0) return (long) info.frameIndex * streamInfo.maxBlockSize;
+        return -1;
+    }
+
+    // Decodes and discards audio blocks until the given number of samples has been skipped. The
+    // block that contains the target is kept for the following decodeFrame() calls, so playback
+    // continues exactly at the requested sample.
+    private void skipSamples(long skip) throws IOException {
+        decodedOffset = 0;
+        decodedLength = 0;
+        while (skip > 0) {
+            int blockSamples = readAudioBlock(samples, 0);
+            if (blockSamples == 0) return; // End of stream
+            if (skip >= blockSamples) {
+                skip -= blockSamples;
+            } else {
+                decodedOffset = (int) skip;
+                decodedLength = blockSamples - (int) skip;
+                return;
+            }
+        }
     }
 }

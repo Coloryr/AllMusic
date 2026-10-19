@@ -117,6 +117,20 @@ public abstract class AbstractFlacLowLevelInput implements FlacLowLevelInput {
         resetCrcs();
     }
 
+    // Seeks to the given byte position if it is still contained in the current byte buffer.
+    // This never touches the underlying stream, so it is cheap, and it allows a few bytes to be
+    // re-read (for example after probing a frame header). Returns true on success, or false if
+    // the position is not buffered anymore and a full seek is required.
+    public boolean seekWithinBuffer(long pos) {
+        if (byteBufferLen <= 0 || pos < byteBufferStartPos || pos >= byteBufferStartPos + byteBufferLen)
+            return false;
+        byteBufferIndex = (int) (pos - byteBufferStartPos);
+        bitBuffer = 0; // The bits are read from the byte buffer again below
+        bitBufferLen = 0;
+        resetCrcs();
+        return true;
+    }
+
     /*-- CRC calculations --*/
 
     // Either returns silently or throws an exception.

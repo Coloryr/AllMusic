@@ -47,6 +47,19 @@ public interface FlacLowLevelInput extends AutoCloseable {
     // increments for each bit consumed, maxes out at 7, then resets to 0 and repeats.
     public int getBitPosition();
 
+    /*---- Seeking ----*/
+
+    // Seeks to the given byte position in the stream, a non-negative value. After this call,
+    // getPosition() returns pos, getBitPosition() returns 0, and the CRC calculations are reset.
+    // This method may throw UnsupportedOperationException if this stream cannot seek.
+    public void seekTo(long pos) throws IOException;
+
+    // Tries to seek to the given byte position using only data that is still held in memory,
+    // without touching the underlying stream. Returns true if the position was reached, or false
+    // if the position is not buffered anymore (in which case seekTo() has to be used).
+    // The stream must be at a byte boundary (i.e. getBitPosition() == 0).
+    public boolean seekWithinBuffer(long pos);
+
     /*---- Reading bitwise integers ----*/
 
     // Reads the next given number of bits (0 <= n <= 32) as an unsigned integer (i.e. zero-extended to int32).

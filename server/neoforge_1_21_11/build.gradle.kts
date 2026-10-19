@@ -18,7 +18,7 @@ repositories {
 dependencies {
     minecraft("com.mojang:minecraft:1.21.11")
     mappings(loom.officialMojangMappings())
-    neoForge("net.neoforged:neoforge:21.11.42")
+    neoForge("net.neoforged:neoforge:21.11.48")
 
     implementation(include("net.kyori:adventure-platform-neoforge:6.8.0")!!)
 }

@@ -24,6 +24,7 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.lifecycle.ClientStoppingEvent;
 import net.neoforged.neoforge.client.event.sound.PlaySoundSourceEvent;
 import net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent;
 import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
@@ -54,6 +55,11 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
         if (ModList.get().isLoaded("modernui")) {
             modui = true;
         }
+    }
+
+    @SubscribeEvent
+    public void onClientStopping(ClientStoppingEvent event) {
+        AllMusicCore.stop();
     }
 
     @SubscribeEvent

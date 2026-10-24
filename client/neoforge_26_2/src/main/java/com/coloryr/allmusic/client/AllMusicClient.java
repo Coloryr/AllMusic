@@ -57,9 +57,8 @@ public class AllMusicClient implements IPayloadHandler<MusicCodec>, AllMusicBrid
         }
     }
 
-
     @SubscribeEvent
-    public void onClientStopping(ClientStoppingEvent event) {
+    public static void onClientStopping(ClientStoppingEvent event) {
         AllMusicCore.stop();
     }
 

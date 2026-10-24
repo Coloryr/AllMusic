@@ -51,7 +51,7 @@ public class AllMusicClient implements AllMusicBridge, IPayloadHandler<MusicCode
     }
 
     @SubscribeEvent
-    public void onClientStopping(ClientStoppingEvent event) {
+    public static void onClientStopping(ClientStoppingEvent event) {
         AllMusicCore.stop();
     }
 

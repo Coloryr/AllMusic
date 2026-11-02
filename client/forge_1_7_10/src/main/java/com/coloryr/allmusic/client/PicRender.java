@@ -39,6 +39,12 @@ public class PicRender extends PictureFrameBuffer {
     }
 
     @Override
+    public void dispose() {
+        sourceTexture.deleteGlTexture();
+        rotateTexture.deleteGlTexture();
+    }
+
+    @Override
     public void draw(boolean rotate, int size, float x, float y, int ang, HudPosType dir, float alpha) {
         Point2f point = AllMusicHud.getPos(size, size, x, y, dir);
 

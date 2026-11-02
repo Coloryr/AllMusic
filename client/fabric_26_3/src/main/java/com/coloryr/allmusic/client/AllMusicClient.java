@@ -131,5 +131,8 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         AllMusicCore.init(FabricLoader.getInstance().getConfigDir(), this);
 
         ClientLifecycleEvents.CLIENT_STOPPING.register((a) -> AllMusicCore.stop());
+
+        // 客户端指令：/music_client help | info | test | imagesize <大小>
+        CommandMusicClientFabric.register();
     }
 }

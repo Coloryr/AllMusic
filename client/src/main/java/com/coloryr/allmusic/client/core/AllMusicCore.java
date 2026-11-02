@@ -19,11 +19,13 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,6 +35,25 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class AllMusicCore {
     public static final CommandType[] types = CommandType.values();
+    /**
+     * 图片大小的最小值
+     */
+    public static final int MIN_PIC_SIZE = 16;
+    /**
+     * 图片大小的最大值
+     */
+    public static final int MAX_PIC_SIZE = 1024;
+    /**
+     * 默认静音的日志
+     * <p>
+     * httpclient 的调试输出会刷 debug.log；
+     * 旅行者地图则是按 debug 等级在屏幕上画调试标签（TileDrawStep 里 isDebugEnabled() 就画），
+     * 所以一起压到 INFO，避免 debug.log 和屏幕都被刷
+     */
+    public static final List<String> DEFAULT_LOG_QUIET = Arrays.asList(
+            "org.apache.hc.client5",
+            "org.apache.hc.core5",
+            "journeymap");
 
     private static final Gson gson = new Gson();
     /**
@@ -44,6 +65,10 @@ public class AllMusicCore {
      */
     public static ConfigObj config;
     public static CloseableHttpClient client;
+    /**
+     * 配置文件
+     */
+    private static File configFile;
     /**
      * 音频解码器与播放器
      */
@@ -90,7 +115,7 @@ public class AllMusicCore {
         headers.add(new BasicHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"));
         client = HttpClients.custom().setDefaultHeaders(headers).build();
 
-        File configFile = new File(file.toFile(), "allmusic_client.json");
+        configFile = new File(file.toFile(), "allmusic_client.json");
         if (configFile.exists()) {
             try {
                 InputStreamReader reader = new InputStreamReader(
@@ -108,33 +133,53 @@ public class AllMusicCore {
             config = new ConfigObj();
             config.picSize = 240;
             config.queueSize = 100;
-            try {
-                String data = new GsonBuilder().setPrettyPrinting()
-                        .create()
-                        .toJson(config);
-                FileOutputStream out = new FileOutputStream(configFile);
-                OutputStreamWriter write = new OutputStreamWriter(out, StandardCharsets.UTF_8);
-                write.write(data);
-                write.close();
-                out.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
+        if (config.logQuiet == null || config.logQuiet.isEmpty()) {
+            config.logQuiet = new ArrayList<>(DEFAULT_LOG_QUIET);
+        }
+        saveConfig();
 
         AllMusicCore.bridge = bridge;
         player = new AllMusicPlayer(source);
 
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        Configuration config = ctx.getConfiguration();
+//        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+//        Configuration logConfig = ctx.getConfiguration();
+//
+//        setLoggerLevel(logConfig, "org.apache.hc.client5", Level.INFO);
+//        setLoggerLevel(logConfig, "org.apache.hc.core5", Level.INFO);
+//
+//        ctx.updateLoggers(logConfig);
+    }
 
-        LoggerConfig loggerConfig = config.getLoggerConfig("org.apache.hc.client5");
-        loggerConfig.setLevel(Level.INFO);
+    /**
+     * 只调整指定 logger 的等级，不动根 logger
+     * <p>
+     * {@link Configuration#getLoggerConfig(String)} 找不到同名 logger 时会返回父级或根 logger，
+     * 直接 setLevel 会顺带把根 logger 的等级改掉，等于把玩家自己的日志配置整个覆盖了。
+     * 这里只修改同名 logger；没有就新建一个（additive，日志依旧会输出到根 logger 的 appender）
+     *
+     * @param logConfig 日志配置
+     * @param name      logger 名字
+     * @param level     日志等级
+     */
+    private static void setLoggerLevel(Configuration logConfig, String name, Level level) {
+        LoggerConfig loggerConfig = logConfig.getLoggerConfig(name);
 
-        LoggerConfig coreConfig = config.getLoggerConfig("org.apache.hc.core5");
-        coreConfig.setLevel(Level.INFO);
+        if (name.equals(loggerConfig.getName())) {
+            loggerConfig.setLevel(level);
+            return;
+        }
 
-        ctx.updateLoggers(config);
+        // 没有同名 logger：新建一个挂进配置。
+        // Configuration#addLogger 只存在于实现类（1.7.10 自带的 2.0-beta9 里连接口都没有），
+        // 所以按运行时类型反射调用，避免换版本时 NoSuchMethodError
+        try {
+            Method addLogger = logConfig.getClass()
+                    .getMethod("addLogger", String.class, LoggerConfig.class);
+            addLogger.invoke(logConfig, name, new LoggerConfig(name, level, true));
+        } catch (Exception ignored) {
+            // 实在加不进去就保持原样，绝不去改根 logger
+        }
     }
 
     public static void stop() {
@@ -163,6 +208,120 @@ public class AllMusicCore {
      */
     public static void renderInit() {
         hud = new AllMusicHud(config.picSize);
+    }
+
+    /**
+     * 获取图片大小
+     *
+     * @return 图片大小
+     */
+    public static int getPicSize() {
+        return config == null ? 0 : config.picSize;
+    }
+
+    /**
+     * 设置图片大小
+     * <p>
+     * 立即重建图片渲染缓冲；下一次收到图片（比如下一首歌的封面）时就会用新的大小生成。
+     * 当前正在显示的封面会重新拉取一次，没有封面时等下一首歌的图片包。
+     * 同时写回 allmusic_client.json，重启后依然生效
+     *
+     * @param size 图片大小
+     * @return 是否设置成功
+     */
+    public static boolean setPicSize(int size) {
+        if (config == null) {
+            return false;
+        }
+        if (size < MIN_PIC_SIZE || size > MAX_PIC_SIZE) {
+            return false;
+        }
+
+        config.picSize = size;
+        saveConfig();
+        if (hud != null) {
+            hud.setPicSize(size);
+        }
+        return true;
+    }
+
+    /**
+     * 保存配置文件
+     */
+    public static void saveConfig() {
+        if (configFile == null || config == null) {
+            return;
+        }
+        try {
+            String data = new GsonBuilder().setPrettyPrinting()
+                    .create()
+                    .toJson(config);
+            FileOutputStream out = new FileOutputStream(configFile);
+            OutputStreamWriter write = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+            write.write(data);
+            write.close();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 客户端信息
+     *
+     * @return 每一行内容
+     */
+    public static List<String> getInfoLines() {
+        List<String> list = new ArrayList<>();
+
+        list.add("配置文件: config/allmusic_client.json");
+        list.add("图片大小 picSize: " + getPicSize()
+                + "（范围 " + MIN_PIC_SIZE + "-" + MAX_PIC_SIZE + "，/music_client imagesize <大小> 修改）");
+        list.add("音频队列: " + (config == null ? 0 : config.queueSize));
+        list.add("HUD 渲染层: " + (hud == null ? "未初始化" : "已初始化"));
+
+        if (hud != null) {
+            list.add("HUD 数据: " + (hud.hasHudData() ? "已收到" : "未收到（没进服或者服务端没发）"));
+            list.add("当前封面: " + (hud.hasImage() ? "有，尺寸 " + hud.getPicSize() + "x" + hud.getPicSize() : "无"));
+            String url = hud.getLastPicUrl();
+            if (url != null && !url.isEmpty()) {
+                list.add("封面地址: " + url);
+            }
+        }
+
+        list.add("播放状态: " + (isPlay() ? "播放中" : "未播放"));
+
+        return list;
+    }
+
+    /**
+     * 客户端自检
+     *
+     * @return 每一行结果，[OK] 正常，[!!] 异常
+     */
+    public static List<String> getTestLines() {
+        List<String> list = new ArrayList<>();
+
+        list.add(check(config != null, "核心初始化"));
+        list.add(check(bridge != null, "游戏桥"));
+        list.add(check(client != null, "网络客户端"));
+        list.add(check(player != null, "音频播放器"));
+        list.add(check(hud != null, "HUD 渲染层"));
+
+        if (bridge != null) {
+            list.add("  屏幕大小: " + bridge.getScreenWidth() + "x" + bridge.getScreenHeight());
+            list.add("  字体高度: " + bridge.getFontHeight());
+        }
+
+        if (hud != null) {
+            list.addAll(hud.getTestLines());
+        }
+
+        return list;
+    }
+
+    private static String check(boolean ok, String text) {
+        return (ok ? "[OK] " : "[!!] ") + text;
     }
 
     /**

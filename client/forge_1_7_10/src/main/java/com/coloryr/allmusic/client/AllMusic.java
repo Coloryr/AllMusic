@@ -22,6 +22,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent17;
 import net.minecraftforge.common.MinecraftForge;
@@ -77,6 +78,9 @@ public class AllMusic implements AllMusicBridge {
         IntBuffer source = findOpenAlSource();
         AllMusicCore.init(new File("config").toPath(), this, source);
         AllMusicCore.renderInit();
+
+        // 客户端指令：/music_client help | info | test | imagesize <大小>
+        ClientCommandHandler.instance.registerCommand(new CommandMusicClientForge());
     }
 
     /**

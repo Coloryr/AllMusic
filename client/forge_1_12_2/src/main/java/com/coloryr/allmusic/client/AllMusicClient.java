@@ -14,6 +14,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -61,6 +62,9 @@ public class AllMusicClient implements AllMusicBridge {
         }
         AllMusicCore.init(evt.getModConfigurationDirectory().toPath(), this);
         MinecraftForge.EVENT_BUS.register(this);
+
+        // 客户端指令：/music_client help | info | test | imagesize <大小>
+        ClientCommandHandler.instance.registerCommand(new CommandMusicClientForge());
         try {
             Class<?> server = Class.forName("com.coloryr.allmusic.server.AllMusicServer");
             Field m = server.getField("channel");

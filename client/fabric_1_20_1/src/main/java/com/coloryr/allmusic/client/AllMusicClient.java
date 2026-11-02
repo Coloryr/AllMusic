@@ -138,5 +138,8 @@ public class AllMusicClient implements ClientModInitializer, AllMusicBridge {
         RenderSystem.recordRenderCall(AllMusicCore::renderInit);
 
         ClientLifecycleEvents.CLIENT_STOPPING.register((a) -> AllMusicCore.stop());
+
+        // 客户端指令：/music_client help | info | test | imagesize <大小>
+        CommandMusicClientFabric.register();
     }
 }

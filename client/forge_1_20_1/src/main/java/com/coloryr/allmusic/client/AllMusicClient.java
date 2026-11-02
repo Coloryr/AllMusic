@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.sound.SoundEngineLoadEvent;
 import net.minecraftforge.client.event.sound.SoundEvent;
@@ -133,6 +134,11 @@ public class AllMusicClient implements AllMusicBridge {
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         AllMusicCore.tick();
+    }
+
+    @SubscribeEvent
+    public void onRegisterCommands(RegisterClientCommandsEvent event) {
+        CommandMusicClientForge.register(event.getDispatcher());
     }
 
     @Override

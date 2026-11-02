@@ -22,4 +22,12 @@ public abstract class PictureFrameBuffer {
      * @param alpha  透明度
      */
     public abstract void draw(boolean rotate, int size, float x, float y, int ang, HudPosType dir, float alpha);
+
+    /**
+     * 释放图片占用的资源
+     * <p>
+     * 修改图片大小时会换掉旧的渲染缓冲，旧的贴图需要释放
+     */
+    public void dispose() {
+    }
 }

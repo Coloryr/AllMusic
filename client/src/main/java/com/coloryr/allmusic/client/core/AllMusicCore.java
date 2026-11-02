@@ -106,7 +106,7 @@ public class AllMusicCore {
         }
         if (config == null) {
             config = new ConfigObj();
-            config.picSize = 120;
+            config.picSize = 300;
             config.queueSize = 100;
             try {
                 String data = new GsonBuilder().setPrettyPrinting()

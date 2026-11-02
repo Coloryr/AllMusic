@@ -60,6 +60,7 @@ public class CommandHudSet extends AHudCommand {
             commandList.put("size", new PicSize());
             commandList.put("rotate", new PicRotate());
             commandList.put("speed", new PicRotateSpeed());
+            commandList.put("bg", new PicBg());
         } else if (type == HudType.INFO) {
             commandList.put("color", new HudColor(type));
             commandList.put("shadow", new HudShadow(type));
@@ -424,6 +425,28 @@ public class CommandHudSet extends AHudCommand {
             }
             AllMusic.side.sendMessage(sender,
                     AllMusic.getMessage().hud.picSpeed.replace(ARG.value, args[3]));
+        }
+    }
+
+    private static class PicBg extends ACommand {
+        @Override
+        public void execute(Object sender, String name, String[] args) {
+            if (args.length == 3 || args.length == 4) {
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().hud.picRotate
+                        .replace(ARG.value, HudUtils.setPicBg(name, args.length == 4 ? args[3] : null)
+                                ? AllMusic.getMessage().hudList.enable
+                                : AllMusic.getMessage().hudList.disable));
+                return;
+            }
+            AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.error);
+        }
+
+        @Override
+        public List<String> tab(Object player, String name, String[] args, int index) {
+            if (args.length == index + 1) {
+                return CommandHud.tf;
+            }
+            return Collections.emptyList();
         }
     }
 }

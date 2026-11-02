@@ -1,5 +1,6 @@
 package com.coloryr.allmusic.client;
 
+import com.coloryr.allmusic.client.core.CommandMusicClient;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

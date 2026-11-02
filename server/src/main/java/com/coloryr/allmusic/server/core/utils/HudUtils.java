@@ -333,6 +333,27 @@ public class HudUtils {
     }
 
     /**
+     * 图片旋转开关
+     *
+     * @param player 用户名
+     * @param open   开关
+     * @return 结果
+     */
+    public static boolean setPicBg(String player, String open) {
+        HudPosObj obj = HudSave.getOrNew(player);
+
+        if (open != null) {
+            obj.pic.bg = Boolean.parseBoolean(open);
+        } else {
+            obj.pic.bg = !obj.pic.bg;
+        }
+
+        HudSave.update(player, obj);
+        HudUtils.sendHudPos(player);
+        return obj.pic.bg;
+    }
+
+    /**
      * 图片旋转速度设置
      *
      * @param player 用户名

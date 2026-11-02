@@ -14,11 +14,13 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +28,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -46,14 +51,12 @@ public class AllMusicCore {
     /**
      * 默认静音的日志
      * <p>
-     * httpclient 的调试输出会刷 debug.log；
-     * 旅行者地图则是按 debug 等级在屏幕上画调试标签（TileDrawStep 里 isDebugEnabled() 就画），
-     * 所以一起压到 INFO，避免 debug.log 和屏幕都被刷
+     * httpclient 的调试输出会刷 debug.log（http-outgoing 之类），压到 INFO 就够了；
+     * 别的 mod 不动，尤其是旅行者地图：它会按自己的 debug 等级在屏幕上画调试标签
      */
     public static final List<String> DEFAULT_LOG_QUIET = Arrays.asList(
             "org.apache.hc.client5",
-            "org.apache.hc.core5",
-            "journeymap");
+            "org.apache.hc.core5");
 
     private static final Gson gson = new Gson();
     /**
@@ -142,13 +145,100 @@ public class AllMusicCore {
         AllMusicCore.bridge = bridge;
         player = new AllMusicPlayer(source);
 
-//        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-//        Configuration logConfig = ctx.getConfiguration();
-//
-//        setLoggerLevel(logConfig, "org.apache.hc.client5", Level.INFO);
-//        setLoggerLevel(logConfig, "org.apache.hc.core5", Level.INFO);
-//
-//        ctx.updateLoggers(logConfig);
+        applyLogLevels();
+    }
+
+    /**
+     * 按配置把日志压到 INFO
+     * <p>
+     * 不能直接 setLevel 根 logger（getLoggerConfig 找不到同名 logger 时会返回根 logger）。
+     * 但只建 LoggerConfig 也不行：{@code updateLoggers} 会按配置重建所有 logger 的等级，
+     * 把别的 mod 运行时自己 setLevel 的设置一起重置——旅行者地图就是这样，
+     * 它的 journeymap logger 会被重置回继承的 DEBUG，然后开始在屏幕上画调试标签。
+     * 所以这里先记下所有 logger 的等级，更新完再把不属于静音范围的恢复回去。
+     */
+    private static void applyLogLevels() {
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration logConfig = ctx.getConfiguration();
+
+        Map<String, Level> levels = snapshotLevels(ctx);
+
+        for (String name : config.logQuiet) {
+            if (name == null || name.isEmpty()) {
+                continue;
+            }
+            setLoggerLevel(logConfig, name, Level.INFO);
+        }
+
+        ctx.updateLoggers(logConfig);
+
+        for (Map.Entry<String, Level> entry : levels.entrySet()) {
+            if (entry.getValue() == null || isQuiet(config.logQuiet, entry.getKey())) {
+                continue;
+            }
+            Logger logger = ctx.getLogger(entry.getKey());
+            if (!entry.getValue().equals(logger.getLevel())) {
+                logger.setLevel(entry.getValue());
+            }
+        }
+    }
+
+    /**
+     * 记下当前所有 logger 的等级
+     * <p>
+     * log4j 2.8+ 有 {@code getLoggers()}；1.7.10/1.12.2 自带的 2.0-beta9 没有，退到私有字段
+     *
+     * @param ctx 日志上下文
+     * @return logger 名字到等级的映射
+     */
+    private static Map<String, Level> snapshotLevels(LoggerContext ctx) {
+        Map<String, Level> levels = new HashMap<>();
+
+        try {
+            Method method = LoggerContext.class.getMethod("getLoggers");
+            Object result = method.invoke(ctx);
+            if (result instanceof Collection) {
+                for (Object item : (Collection<?>) result) {
+                    if (item instanceof Logger) {
+                        Logger logger = (Logger) item;
+                        levels.put(logger.getName(), logger.getLevel());
+                    }
+                }
+            }
+            return levels;
+        } catch (Throwable ignored) {
+            // 老版本没有 getLoggers
+        }
+
+        try {
+            Field field = LoggerContext.class.getDeclaredField("loggers");
+            field.setAccessible(true);
+            Object result = field.get(ctx);
+            if (result instanceof Map) {
+                for (Object item : ((Map<?, ?>) result).values()) {
+                    if (item instanceof Logger) {
+                        Logger logger = (Logger) item;
+                        levels.put(logger.getName(), logger.getLevel());
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+            // 拿不到就算了，至少不会去改根 logger
+        }
+
+        return levels;
+    }
+
+    /**
+     * 是否属于要静音的日志
+     */
+    private static boolean isQuiet(List<String> quiet, String name) {
+        for (String prefix : quiet) {
+            if (prefix != null && (name.equals(prefix) || name.startsWith(prefix + "."))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

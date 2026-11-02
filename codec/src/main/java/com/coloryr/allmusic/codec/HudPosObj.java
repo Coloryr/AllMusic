@@ -65,6 +65,7 @@ public class HudPosObj {
         obj.rotate = true;
         obj.alpha = 1.0f;
         obj.speed = 30;
+        obj.bg = true;
         return obj;
     }
 

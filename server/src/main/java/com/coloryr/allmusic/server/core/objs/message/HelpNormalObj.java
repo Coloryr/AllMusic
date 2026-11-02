@@ -31,6 +31,7 @@ public class HelpNormalObj {
     public String hud12;
     public String hud13;
     public String hud14;
+    public String hud15;
     public String join;
 
     public static HelpNormalObj make() {
@@ -99,6 +100,8 @@ public class HelpNormalObj {
             return true;
         if (hud14 == null)
             return true;
+        if (hud15 == null)
+            return true;
         if (agree == null)
             return true;
         return hud5 == null;
@@ -157,6 +160,8 @@ public class HelpNormalObj {
             hud13 = "<light_purple>[AllMusic]<yellow>/music hud [位置] maxwidth [长度] 设置滚动模式开启后，最大渲染长度";
         if (hud14 == null)
             hud14 = "<light_purple>[AllMusic]<yellow>/music hud [位置] gap [值] 设置文本之间的间隔";
+        if (hud15 == null)
+            hud15 = "<light_purple>[AllMusic]<yellow>/music hud pic bg [开关] 设置底图是否显示";
         if (hud3 == null)
             hud3 = "<light_purple>[AllMusic]<yellow>/music hud pic size [尺寸] 设置图片尺寸";
         if (hud4 == null)

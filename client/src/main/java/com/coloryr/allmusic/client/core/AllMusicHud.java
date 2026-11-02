@@ -788,13 +788,13 @@ public class AllMusicHud {
         }
         //绘制图片
         if (save.pic.enable && haveImg) {
-            if (save.pic.rotate) {
+            if (save.pic.bg && save.pic.rotate) {
                 bg1.drawPic(save.pic.x, save.pic.y, save.pic.size, save.pic.size, save.pic.pos, save.pic.alpha);
             }
 
             picRender.draw(save.pic.rotate, save.pic.size, save.pic.x, save.pic.y, ang, save.pic.pos, save.pic.alpha);
 
-            if (save.pic.rotate) {
+            if (save.pic.bg && save.pic.rotate) {
                 bg3.drawPic(save.pic.x, save.pic.y, save.pic.size, save.pic.size, save.pic.pos, save.pic.alpha);
             }
         }

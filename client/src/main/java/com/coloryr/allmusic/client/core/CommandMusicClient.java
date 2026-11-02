@@ -1,6 +1,4 @@
-package com.coloryr.allmusic.client;
-
-import com.coloryr.allmusic.client.core.AllMusicCore;
+package com.coloryr.allmusic.client.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +14,22 @@ import java.util.Locale;
 public class CommandMusicClient {
     public static final String NAME = "music_client";
 
-    private static final String ARG_HELP = "help";
-    private static final String ARG_INFO = "info";
-    private static final String ARG_TEST = "test";
-    private static final String ARG_IMAGE_SIZE = "imagesize";
+    /**
+     * 子指令：帮助
+     */
+    public static final String ARG_HELP = "help";
+    /**
+     * 子指令：状态
+     */
+    public static final String ARG_INFO = "info";
+    /**
+     * 子指令：自检
+     */
+    public static final String ARG_TEST = "test";
+    /**
+     * 子指令：图片大小
+     */
+    public static final String ARG_IMAGE_SIZE = "imagesize";
 
     /**
      * 所有子指令，Tab 补全用

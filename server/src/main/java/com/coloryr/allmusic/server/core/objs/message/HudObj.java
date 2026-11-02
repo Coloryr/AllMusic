@@ -17,6 +17,7 @@ public class HudObj {
     public String picSize;
     public String picRotate;
     public String picSpeed;
+    public String picBg;
     public String music;
     public String lyric;
     public String tlyric;
@@ -66,6 +67,8 @@ public class HudObj {
             return true;
         if (picSpeed == null)
             return true;
+        if (picBg == null)
+            return true;
         return klyric == null;
     }
 
@@ -102,6 +105,8 @@ public class HudObj {
             picRotate = "<light_purple>[AllMusic]<yellow>设置图片旋转为[" + ARG.value + "]";
         if (picSpeed == null)
             picSpeed = "<light_purple>[AllMusic]<yellow>设置图片旋转速度为[" + ARG.value + "]";
+        if (picBg == null)
+            picBg = "<light_purple>[AllMusic]<yellow>设置图片底图为[" + ARG.value + "]";
         if (music == null)
             music = ARG.name + " " + ARG.musicAuthor + "\n" + ARG.musicAlia + "\n" + ARG.musicAl
                     + "\nby: " + ARG.player;

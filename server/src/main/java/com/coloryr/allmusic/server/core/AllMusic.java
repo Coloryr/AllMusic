@@ -53,15 +53,15 @@ public class AllMusic {
     /**
      * 插件版本号
      */
-    public static final String version = "4.0.0";
+    public static final String version = "4.3.0";
     /**
      * 配置文件版本号
      */
-    public static final String configVersion = "402";
+    public static final String configVersion = "403";
     /**
      * 语言文件配置版本号
      */
-    public static final String messageVersion = "401";
+    public static final String messageVersion = "402";
     /**
      * 日志
      */

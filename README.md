@@ -33,20 +33,20 @@
 1. 安装AllMusic_Server
 
 Paper服务器  
-复制`[paper]AllMusic_Server-4.2.9.jar`到你的`plugins`文件夹  
+复制`[paper]AllMusic_Server-4.3.0.jar`到你的`plugins`文件夹  
 Folia服务器  
-复制`[folia]AllMusic_Server-4.2.9.jar`到你的`plugins`文件夹  
+复制`[folia]AllMusic_Server-4.3.0.jar`到你的`plugins`文件夹  
 Velocity服务器  
-复制`[velocity]AllMusic_Server-4.2.9.jar`到你的`plugins`文件夹  
+复制`[velocity]AllMusic_Server-4.3.0.jar`到你的`plugins`文件夹  
 BungeeCord服务器  
-复制`[bungeecord]AllMusic_Server-4.2.9.jar`到你的`plugins`文件夹  
+复制`[bungeecord]AllMusic_Server-4.3.0.jar`到你的`plugins`文件夹  
 Forge/Fabric/NeoForge类服务器  
-复制`[xxx-xxx]AllMusic_Server-4.2.9.jar`到你的`mods`文件夹  
+复制`[xxx-xxx]AllMusic_Server-4.3.0.jar`到你的`mods`文件夹  
 
-注：Release页面下载的文件名会把方括号换成点，比如`paper.AllMusic_Server-4.2.9.jar`，和上面是同一个文件
+注：Release页面下载的文件名会把方括号换成点，比如`paper.AllMusic_Server-4.3.0.jar`，和上面是同一个文件
 
 2. 安装客户端mod
-复制`[xxx-xxx]AllMusic_Client-4.2.9.jar`到客户端的`mods`文件夹
+复制`[xxx-xxx]AllMusic_Client-4.3.0.jar`到客户端的`mods`文件夹
 重启客户端
 
 如果你是单人游戏使用或者联机使用OneJar版本
@@ -64,7 +64,7 @@ AllMusic不会内置音乐api，你想要正常使用需要自己安装
 - 插件端（Paper/Folia/BungeeCord/Velocity）：使用 MiniMessage 颜色输出
 - 模组端（Forge/Fabric/NeoForge）：输出到对应模组日志，颜色会被去掉
 
-启动时会依次打印插件版本、配置文件版本、语言文件版本、注册的音乐API，最后是`已启动-4.0.0`
+启动时会依次打印插件版本、配置文件版本、语言文件版本、注册的音乐API，最后是`已启动-4.3.0`
 
 | 日志 | 说明 |
 | --- | --- |
@@ -141,6 +141,7 @@ AllMusic不会内置音乐api，你想要正常使用需要自己安装
 | `/music hud pic size <像素>` | 设置封面尺寸 |
 | `/music hud pic rotate [true/false]` | 设置封面旋转 |
 | `/music hud pic speed <数值>` | 设置封面旋转速度（每多少毫秒转1度） |
+| `/music hud pic bg [true/false]` | 设置图片底图是否渲染 |
 
 对齐方式取值：`TOP_LEFT`、`TOP_CENTER`、`TOP_RIGHT`、`LEFT`、`CENTER`、`RIGHT`、`BOTTOM_LEFT`、`BOTTOM_CENTER`、`BOTTOM_RIGHT`
 

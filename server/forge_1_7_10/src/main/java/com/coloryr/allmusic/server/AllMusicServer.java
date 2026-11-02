@@ -48,8 +48,6 @@ public class AllMusicServer {
 
         AllMusic.log = new LogForge();
         AllMusic.side = new SideForge();
-
-        new AllMusic().init(new File(AllMusic.SERVER_DIR));
     }
 
     @Mod.EventHandler
@@ -60,6 +58,8 @@ public class AllMusicServer {
     @Mod.EventHandler
     public void onServerStarting(FMLServerStartingEvent event) {
         server = event.getServer();
+
+        new AllMusic().init(new File(AllMusic.SERVER_DIR));
 
         ServerCommandManager commandManager = (ServerCommandManager) server.getCommandManager();
         commandManager.registerCommand(new CommandForge());

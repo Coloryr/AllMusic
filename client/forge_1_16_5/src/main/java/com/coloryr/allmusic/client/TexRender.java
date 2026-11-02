@@ -134,7 +134,8 @@ public class TexRender extends TextureRender {
         float y1 = h1;
         float z = 0;
         float u0 = 0;
-        float u1 = width;
+        // 整张贴图铺满整个四边形，U/V 必须是 0~1，不能写成 width，否则底图会被横向平铺/拉伸
+        float u1 = 1;
         float v0 = 0;
         float v1 = 1;
 

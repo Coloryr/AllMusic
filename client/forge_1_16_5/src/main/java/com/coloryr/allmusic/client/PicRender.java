@@ -28,6 +28,12 @@ public class PicRender extends PictureFrameBuffer {
     }
 
     @Override
+    public void dispose() {
+        sourceTexture.releaseId();
+        rotateTexture.releaseId();
+    }
+
+    @Override
     public void update(byte[] source, byte[] rotate) {
         try {
             ByteArrayInputStream stream = new ByteArrayInputStream(source);

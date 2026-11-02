@@ -1,6 +1,7 @@
 package com.coloryr.allmusic.client.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -106,6 +107,36 @@ public class CommandMusicClient {
         }
 
         return 1;
+    }
+
+    /**
+     * 处理一条聊天栏输入
+     * <p>
+     * 没有客户端指令 API 的版本（比如 1.16.5 Forge）在拦截「发送聊天/指令」时调用这里，
+     * 命中 {@code /music_client} 就本地处理并返回 true，调用方把这条消息吞掉即可
+     *
+     * @param message 原始输入，例如 {@code /music_client imagesize 128}
+     * @return 是否已处理（true 表示不要发给服务端）
+     */
+    public static boolean handleChat(String message) {
+        if (message == null) {
+            return false;
+        }
+
+        String text = message.trim();
+        if (!text.startsWith("/")) {
+            return false;
+        }
+
+        String[] parts = text.substring(1).trim().split("\\s+");
+        if (parts.length == 0 || parts[0].isEmpty() || !NAME.equalsIgnoreCase(parts[0])) {
+            return false;
+        }
+
+        String[] args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
+        run(args);
+
+        return true;
     }
 
     /**

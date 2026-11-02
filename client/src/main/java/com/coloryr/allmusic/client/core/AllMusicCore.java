@@ -181,8 +181,10 @@ public class AllMusicCore {
      * 停止播放
      */
     private static void stopPlaying() {
-        player.closePlayer();
-        hud.clear();
+        if (player != null)
+            player.closePlayer();
+        if (hud != null)
+            hud.clear();
     }
 
     /**
@@ -198,7 +200,8 @@ public class AllMusicCore {
      * 更新显示内容
      */
     public static void hudUpdate() {
-        hud.update();
+        if (hud != null)
+            hud.update();
     }
 
     /**

@@ -15,6 +15,29 @@ public class MusicPacketCodec {
         return buf;
     }
 
+    /**
+     * 打包成精确长度的字节数组
+     * <p>
+     * {@link #pack(MusicPack)} 返回的 ByteBuf 容量是 Netty 扩容后的值（最小 64，之后按 2 倍增长），
+     * 通常大于实际写入的长度。直接发送 {@code array()} 会带上大量 0 字节；
+     * 1.7.x 客户端的自定义数据包长度是一个 VarShort，代理会按整个数组长度来写，
+     * 数据被撑大后可能超过 32767 的上限，导致客户端收不到数据包。
+     * 因此这里只复制真正写入的字节。
+     *
+     * @param pack 数据
+     * @return 精确长度的数据
+     */
+    public static byte[] packBytes(MusicPack pack) {
+        ByteBuf buf = pack(pack);
+        try {
+            byte[] data = new byte[buf.readableBytes()];
+            buf.readBytes(data);
+            return data;
+        } finally {
+            buf.release();
+        }
+    }
+
     public static void pack(ByteBuf buf, MusicPack pack) {
         buf.writeByte(pack.type.ordinal());
         switch (pack.type) {

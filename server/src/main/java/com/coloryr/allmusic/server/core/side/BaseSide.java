@@ -589,6 +589,38 @@ public abstract class BaseSide {
     public abstract Component miniMessageSuggest(String input, String command);
 
     /**
+     * 构建可点击执行指令的文本
+     * <p>
+     * 配置关闭 showClick 后返回空内容，因为1.7.10客户端不支持点击事件
+     *
+     * @param input   显示文本
+     * @param command 执行的指令
+     * @return 文本
+     */
+    public final Component clickRun(String input, String command) {
+        if (!AllMusic.getConfig().isShowClick()) {
+            return Component.empty();
+        }
+        return miniMessageRun(input, command);
+    }
+
+    /**
+     * 构建可点击补全指令的文本
+     * <p>
+     * 配置关闭 showClick 后返回空内容，因为1.7.10客户端不支持点击事件
+     *
+     * @param input   显示文本
+     * @param command 补全的指令
+     * @return 文本
+     */
+    public final Component clickSuggest(String input, String command) {
+        if (!AllMusic.getConfig().isShowClick()) {
+            return Component.empty();
+        }
+        return miniMessageSuggest(input, command);
+    }
+
+    /**
      * 更新信息
      */
     public void updateInfo() {

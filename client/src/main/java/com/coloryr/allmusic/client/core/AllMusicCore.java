@@ -210,7 +210,12 @@ public class AllMusicCore {
      * @param buffer 数据包
      */
     public static void packRead(ByteBuf buffer) {
-        packDo(MusicPacketCodec.decode(buffer));
+        if (buffer == null || !buffer.isReadable()) {
+            return;
+        }
+        // 1.7.10 的 FML 会把原始 payload 直接交给监听器，且 decode 会修改 buffer 的下标，
+        // 这里复制一份再解析，避免影响其他监听器/FML 自身对同一个 buffer 的使用
+        packDo(MusicPacketCodec.decode(buffer.copy()));
     }
 
     /**

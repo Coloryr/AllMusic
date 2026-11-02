@@ -85,6 +85,7 @@ AllMusic不会内置音乐api，你想要正常使用需要自己安装
 - mutePlayMessage          是否不发送播放信息
 - muteAddMessage           是否不发送点歌信息
 - showInBar                是否将信息限制在bar处
+- showClick                是否显示[点我]操作，1.7.10客户端不支持点击事件，可设为false关闭
 - ktvMode                  是否启用KTV歌词
 - musicBR                  歌曲音质
 - version                  配置文件版本号

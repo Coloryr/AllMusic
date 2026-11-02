@@ -68,7 +68,7 @@ public class SidePaper extends BaseSide {
     public void send(Object player, MusicPack pack) {
         if (player instanceof Player player1) {
             try {
-                send(player1, MusicPacketCodec.pack(pack).array());
+                send(player1, MusicPacketCodec.packBytes(pack));
             } catch (Exception e) {
                 e.printStackTrace();
             }

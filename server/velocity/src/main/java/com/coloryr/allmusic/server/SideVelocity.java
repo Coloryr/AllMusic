@@ -18,7 +18,6 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import io.netty.buffer.ByteBuf;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -168,7 +167,7 @@ public class SideVelocity extends BaseSide implements IEconomy {
     public void send(Object player, MusicPack pack) {
         if (player instanceof Player) {
             Player player1 = (Player) player;
-            send(player1, MusicPacketCodec.pack(pack));
+            send(player1, MusicPacketCodec.packBytes(pack));
         }
     }
 
@@ -280,10 +279,10 @@ public class SideVelocity extends BaseSide implements IEconomy {
         }
     }
 
-    private void send(Player players, ByteBuf data) {
-        if (players == null)
+    private void send(Player players, byte[] data) {
+        if (players == null || data == null || data.length == 0)
             return;
-        runTask(() -> players.sendPluginMessage(AllMusicVelocity.channel, data.array()));
+        runTask(() -> players.sendPluginMessage(AllMusicVelocity.channel, data));
     }
 
     private boolean skip(Player player) {

@@ -22,7 +22,7 @@ dependencies {
 
 tasks {
     processResources {
-        filesMatching("META-INF/mods.toml") {
+        filesMatching("mcmod.info") {
             expand("version" to project.version)
         }
     }

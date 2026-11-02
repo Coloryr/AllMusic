@@ -192,8 +192,10 @@ public class PlayRuntime {
                                 .replace(ARG.time, String.valueOf(AllMusic.getConfig().vote.voteTime))
                                 .replace(ARG.countAll, String.valueOf(PlayRuntime.getMiniVote()));
                         AllMusic.side.broadcast(data);
-                        AllMusic.side.broadcast(AllMusic.side.miniMessage(AllMusic.getMessage().vote.bq1)
-                                .append(AllMusic.side.miniMessageRun(AllMusic.getMessage().vote.bq2, "/music agree")));
+                        if (AllMusic.getConfig().isShowClick()) {
+                            AllMusic.side.broadcast(AllMusic.side.miniMessage(AllMusic.getMessage().vote.bq1)
+                                    .append(AllMusic.side.clickRun(AllMusic.getMessage().vote.bq2, "/music agree")));
+                        }
                     } else if (vote.getType() == VoteItem.VoteType.PUSH) {
                         SongInfoObj music = PlayMusic.getMusic(vote.getId(), vote.getApi());
                         if (music == null) {
@@ -208,8 +210,10 @@ public class PlayRuntime {
                                 .replace(ARG.musicAuthor, music.getAuthor())
                                 .replace(ARG.countAll, String.valueOf(PlayRuntime.getMiniVote()));
                         AllMusic.side.broadcast(data);
-                        AllMusic.side.broadcast(AllMusic.side.miniMessage(AllMusic.getMessage().push.bq1)
-                                .append(AllMusic.side.miniMessageRun(AllMusic.getMessage().push.bq2, "/music agree")));
+                        if (AllMusic.getConfig().isShowClick()) {
+                            AllMusic.side.broadcast(AllMusic.side.miniMessage(AllMusic.getMessage().push.bq1)
+                                    .append(AllMusic.side.clickRun(AllMusic.getMessage().push.bq2, "/music agree")));
+                        }
                     }
                 }
             }

@@ -70,7 +70,7 @@ public class SideBukkit extends BaseSide {
         if (player instanceof Player) {
             Player player1 = (Player) player;
             try {
-                send(player1, MusicPacketCodec.pack(pack).array());
+                send(player1, MusicPacketCodec.packBytes(pack));
             } catch (Exception e) {
                 e.printStackTrace();
             }

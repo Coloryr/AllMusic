@@ -12,7 +12,6 @@ import com.coloryr.allmusic.server.event.MusicAddEvent;
 import com.coloryr.allmusic.server.event.MusicPlayEvent;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import io.netty.buffer.ByteBuf;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -169,7 +168,7 @@ public class SideBungee extends BaseSide implements IEconomy {
     @Override
     public void send(Object player, MusicPack pack) {
         if (player instanceof ProxiedPlayer) {
-            send((ProxiedPlayer) player, MusicPacketCodec.pack(pack));
+            send((ProxiedPlayer) player, MusicPacketCodec.packBytes(pack));
         }
     }
 
@@ -278,11 +277,16 @@ public class SideBungee extends BaseSide implements IEconomy {
         }
     }
 
-    private void send(ProxiedPlayer player, ByteBuf data) {
-        if (player == null) {
+    private void send(ProxiedPlayer player, byte[] data) {
+        if (player == null || data == null || data.length == 0) {
             return;
         }
-        runTask(() -> player.sendData(AllMusic.channel, data.array()));
+        try {
+            runTask(() -> player.sendData(AllMusic.channel, data));
+        } catch (Exception e) {
+            AllMusic.log.data("<light_purple>[AllMusic]<red>数据发送发生错误");
+            e.printStackTrace();
+        }
     }
 
     private boolean skip(ProxiedPlayer player) {

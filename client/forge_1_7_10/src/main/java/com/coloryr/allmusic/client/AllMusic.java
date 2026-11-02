@@ -3,6 +3,8 @@ package com.coloryr.allmusic.client;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.nio.IntBuffer;
 import java.util.List;
 
 import com.coloryr.allmusic.client.core.AllMusicBridge;
@@ -44,7 +46,7 @@ import paulscode.sound.Library;
 import paulscode.sound.SoundSystem;
 import paulscode.sound.libraries.ChannelLWJGLOpenAL;
 
-@Mod(modid = "allmusic_client", version = "3.1.1", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(modid = "allmusic_client", version = "4.2.8", name = "AllMusic_Client", acceptedMinecraftVersions = "[1.7.10]")
 @SideOnly(Side.CLIENT)
 public class AllMusic implements AllMusicBridge {
     public static final Logger LOGGER = LogManager.getLogger("AllMusic Client");
@@ -72,12 +74,119 @@ public class AllMusic implements AllMusicBridge {
     public void test(final FMLLoadCompleteEvent event) {
         Minecraft.getMinecraft().getSoundHandler();
 
-        Library library = ((IGetSoundHandler) sound).allMusic_Client$getSoundLibrary();
-        IGetSound sound1 = (IGetSound) library;
-        List<Channel> list = sound1.allMusic_Client$getStreamingChannels();
-        ChannelLWJGLOpenAL channel = (ChannelLWJGLOpenAL) list.get(list.size() - 1);
-        AllMusicCore.init(new File("config").toPath(), this, channel.ALSource);
+        IntBuffer source = findOpenAlSource();
+        AllMusicCore.init(new File("config").toPath(), this, source);
         AllMusicCore.renderInit();
+    }
+
+    /**
+     * 获取 Minecraft 的 OpenAL 音频源
+     * <p>
+     * 优先走 Mixin 注入的接口；Mixin 没生效（例如没有加载 mixins.allmusic_client.json）时，
+     * 通过反射从 SoundSystem -> Library -> streamingChannels 里取，保证不影响核心初始化
+     */
+    private static IntBuffer findOpenAlSource() {
+        try {
+            Library library = ((IGetSoundHandler) sound).allMusic_Client$getSoundLibrary();
+            IGetSound sound1 = (IGetSound) library;
+            List<Channel> list = sound1.allMusic_Client$getStreamingChannels();
+            ChannelLWJGLOpenAL channel = (ChannelLWJGLOpenAL) list.get(list.size() - 1);
+            return channel.ALSource;
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            SoundSystem soundSystem = findSoundSystem();
+            if (soundSystem == null) {
+                LOGGER.warn("[AllMusic Client] 未找到 SoundSystem，音乐将尝试使用独立音频源");
+                return null;
+            }
+            Library library = findFieldObject(soundSystem, Library.class);
+            if (library == null) {
+                LOGGER.warn("[AllMusic Client] 未找到 SoundLibrary，音乐将尝试使用独立音频源");
+                return null;
+            }
+            IntBuffer source = findStreamingSource(library);
+            if (source == null) {
+                LOGGER.warn("[AllMusic Client] 未找到流式音频声道，音乐将尝试使用独立音频源");
+            }
+            return source;
+        } catch (Throwable e) {
+            LOGGER.warn("[AllMusic Client] 反射获取音频源失败，音乐将尝试使用独立音频源", e);
+            return null;
+        }
+    }
+
+    /**
+     * 从 SoundHandler 里找到 SoundSystem（paulscode 的类名不会被混淆，可以按类型查找）
+     */
+    private static SoundSystem findSoundSystem() throws Exception {
+        Object handler = Minecraft.getMinecraft().getSoundHandler();
+        if (handler == null) {
+            return null;
+        }
+        for (Class<?> clazz = handler.getClass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass()) {
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value = field.get(handler);
+                if (value == null) {
+                    continue;
+                }
+                SoundSystem soundSystem = findFieldObject(value, SoundSystem.class);
+                if (soundSystem != null) {
+                    return soundSystem;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 在对象的字段（含父类）里查找指定类型的值
+     */
+    private static <T> T findFieldObject(Object owner, Class<T> type) throws Exception {
+        for (Class<?> clazz = owner.getClass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass()) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (!type.isAssignableFrom(field.getType())) {
+                    continue;
+                }
+                field.setAccessible(true);
+                Object value = field.get(owner);
+                if (type.isInstance(value)) {
+                    return type.cast(value);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 取最后一个流式声道的 OpenAL source
+     */
+    private static IntBuffer findStreamingSource(Library library) throws Exception {
+        for (Class<?> clazz = library.getClass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass()) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (!List.class.isAssignableFrom(field.getType())) {
+                    continue;
+                }
+                field.setAccessible(true);
+                Object value = field.get(library);
+                if (!(value instanceof List)) {
+                    continue;
+                }
+                List<?> channels = (List<?>) value;
+                for (int i = channels.size() - 1; i >= 0; i--) {
+                    Object channel = channels.get(i);
+                    if (channel instanceof ChannelLWJGLOpenAL) {
+                        IntBuffer source = ((ChannelLWJGLOpenAL) channel).ALSource;
+                        if (source != null) {
+                            return source;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Mod.EventHandler

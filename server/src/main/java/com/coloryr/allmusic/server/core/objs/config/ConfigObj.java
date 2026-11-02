@@ -64,6 +64,10 @@ public class ConfigObj {
      */
     public boolean showInBar;
     /**
+     * 是否显示[点我]操作，1.7.10客户端不支持点击事件
+     */
+    public Boolean showClick;
+    /**
      * K歌歌词
      */
     public boolean ktvMode;
@@ -111,6 +115,17 @@ public class ConfigObj {
      * 歌曲时间修正
      */
     public int fixSongTime;
+
+    /**
+     * 是否显示[点我]操作
+     * <p>
+     * 老配置文件里没有这个字段时，默认显示
+     *
+     * @return 是否显示
+     */
+    public boolean isShowClick() {
+        return showClick == null || showClick;
+    }
 
     public static ConfigObj make() {
         ConfigObj config = new ConfigObj();
@@ -165,6 +180,7 @@ public class ConfigObj {
         mutePlayMessage = false;
         muteAddMessage = false;
         showInBar = false;
+        showClick = true;
         defaultAddMusic = 0;
         defaultApi = "netapi";
         topAPI = false;

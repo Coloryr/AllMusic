@@ -27,3 +27,5 @@ forge*changelog.txt
 lib/
 target/
 .DS_Store
+/.tmp_bc
+/.tmp_rfg

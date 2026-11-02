@@ -148,7 +148,7 @@ public class SideFolia extends BaseSide {
     public void send(Object player, MusicPack pack) {
         if (AllMusic.isRun && player instanceof Player player1) {
             runTask(() -> player1.sendPluginMessage(AllMusicFolia.plugin, AllMusic.channel,
-                    MusicPacketCodec.pack(pack).array()));
+                    MusicPacketCodec.packBytes(pack)));
         }
     }
 

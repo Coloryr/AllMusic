@@ -12,6 +12,7 @@ import com.coloryr.allmusic.server.core.saves.BanSave;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class CommandPush extends ACommand {
     @Override
@@ -35,20 +36,21 @@ public class CommandPush extends ACommand {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.noId);
                 return;
             }
-            SongInfoObj id1 = PlayMusic.findMusicIndex(1);
-            if (id1 != null && id1.getId().equalsIgnoreCase(music.getId())) {
+            SongInfoObj next = PlayMusic.getNextMusic();
+            if (next != null && next.getId().equalsIgnoreCase(music.getId())
+                    && next.getApi().equalsIgnoreCase(music.getApi())) {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.pushErr);
                 return;
             }
 
             VoteItem item = new VoteItem(music.getApi(), music.getId(), name, VoteItem.VoteType.PUSH);
+            // 发起人自己也算一票，和 /music vote 保持一致
+            item.votePlayer.add(name.toLowerCase(Locale.ROOT));
             if (PlayMusic.startVote(item)) {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
             } else {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err5);
             }
-
-            AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
         } else if (args.length == 2) {
             if (args[1].equalsIgnoreCase("cancel")) {
                 if (!PlayMusic.haveVote(name, VoteItem.VoteType.PUSH)) {
@@ -56,7 +58,7 @@ public class CommandPush extends ACommand {
                     return;
                 }
                 PlayMusic.removeVote(name, VoteItem.VoteType.PUSH);
-                AllMusic.side.sendMessage(name, AllMusic.getMessage().push.cancel1);
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.cancel1);
                 return;
             } else {
                 try {
@@ -72,13 +74,13 @@ public class CommandPush extends ACommand {
                 }
 
                 VoteItem item = new VoteItem(music.getApi(), music.getId(), name, VoteItem.VoteType.PUSH);
+                // 发起人自己也算一票，和 /music vote 保持一致
+                item.votePlayer.add(name.toLowerCase(Locale.ROOT));
                 if (PlayMusic.startVote(item)) {
                     AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
                 } else {
                     AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.err5);
                 }
-
-                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.doVote);
             }
         } else if (args.length > 2) {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.error);
@@ -95,7 +97,8 @@ public class CommandPush extends ACommand {
             for (int a = 1; a < list1.size(); a++) {
                 SongInfoObj item = list1.get(a);
                 if (item.getCall().equalsIgnoreCase(name)) {
-                    list.add(String.valueOf(a));
+                    // 用户序号是 1 起（list[a] 对应序号 a+1）
+                    list.add(String.valueOf(a + 1));
                 }
             }
 

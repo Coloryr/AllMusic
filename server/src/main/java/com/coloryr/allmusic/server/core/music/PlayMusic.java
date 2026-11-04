@@ -80,6 +80,11 @@ public class PlayMusic {
 
     public static boolean haveVote(String name, VoteItem.VoteType voteType) {
         name = name.toLowerCase(Locale.ROOT);
+        // 正在进行的投票已经从 voteList 里 poll 出去了，要单独判断，
+        // 否则发起人自己根本取消不了当前这一票
+        if (vote != null && vote.getType() == voteType && vote.getVoteSender().equalsIgnoreCase(name)) {
+            return true;
+        }
         for (VoteItem item : voteList) {
             if (item.getType() == voteType && item.getVoteSender().equalsIgnoreCase(name)) {
                 return true;
@@ -196,10 +201,10 @@ public class PlayMusic {
             if (vote.getVoteSender().equalsIgnoreCase(name) && vote.getType() == voteType) {
                 removeVote();
                 if (voteType == VoteItem.VoteType.NEXT) {
-                    AllMusic.side.broadcast(AllMusic.getMessage().push.cancel);
+                    AllMusic.side.broadcast(AllMusic.getMessage().vote.cancel);
                 }
                 else {
-                    AllMusic.side.broadcast(AllMusic.getMessage().vote.cancel);
+                    AllMusic.side.broadcast(AllMusic.getMessage().push.cancel);
                 }
                 return;
             }

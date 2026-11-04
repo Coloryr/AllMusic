@@ -41,6 +41,7 @@ public class CommandCancel implements ICommand {
                     return;
                 }
 
+                PlayMusic.remove(id);
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().cancel.done);
             } catch (Exception e) {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().cancel.err4);
@@ -59,7 +60,8 @@ public class CommandCancel implements ICommand {
                 for (int a = 1; a < list1.size(); a++) {
                     SongInfoObj item = list1.get(a);
                     if (item.getCall().equalsIgnoreCase(name)) {
-                        list.add(String.valueOf(a));
+                        // 用户序号是 1 起（list[a] 对应序号 a+1）
+                        list.add(String.valueOf(a + 1));
                     }
                 }
             }

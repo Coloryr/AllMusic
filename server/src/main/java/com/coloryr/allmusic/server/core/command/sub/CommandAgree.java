@@ -31,12 +31,14 @@ public class CommandAgree extends ACommand  {
         }
 
         AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.agree);
+
+        // 先把自己算进去再广播，否则第一票永远显示"共有0名玩家同意"
+        PlayMusic.addVote(name);
+
         String data = AllMusic.getMessage().vote.bqAgree;
         data = data.replace(ARG.player, name)
                 .replace(ARG.count, String.valueOf(vote.votePlayer.size()))
                 .replace(ARG.countAll, String.valueOf(PlayRuntime.getMiniVote()));
         AllMusic.side.broadcast(data);
-
-        PlayMusic.addVote(name);
     }
 }

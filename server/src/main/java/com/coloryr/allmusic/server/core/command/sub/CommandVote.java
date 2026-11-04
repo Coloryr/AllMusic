@@ -34,7 +34,7 @@ public class CommandVote extends ACommand {
                     return;
                 }
                 PlayMusic.removeVote(name, VoteItem.VoteType.NEXT);
-                AllMusic.side.sendMessage(sender, AllMusic.getMessage().push.cancel1);
+                AllMusic.side.sendMessage(sender, AllMusic.getMessage().vote.cancel2);
             } else {
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.error);
             }

@@ -80,7 +80,7 @@ public class PushObj {
         if (err4 == null)
             err4 = "<light_purple>[AllMusic]<red>切歌投票跳过不存在的音乐投票";
         if (err5 == null)
-            err5 = "<light_purple>[AllMusic]<red>你已经申请过插歌了，不能再继续申请";
+            err5 = "<light_purple>[AllMusic]<red>这首歌已经有进行中的插歌投票了";
         if (cancel == null)
             cancel = "<light_purple>[AllMusic]<yellow>插歌投票已被发起者取消";
         if (cancel1 == null)

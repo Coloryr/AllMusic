@@ -17,6 +17,7 @@ public class VoteObj {
     public String err6;
     public String cancel;
     public String cancel1;
+    public String cancel2;
     public String list;
 
     public static VoteObj make() {
@@ -57,6 +58,8 @@ public class VoteObj {
             return true;
         if (cancel1 == null)
             return true;
+        if (cancel2 == null)
+            return true;
         if (list == null)
             return true;
         return next == null;
@@ -95,6 +98,8 @@ public class VoteObj {
             cancel = "<light_purple>[AllMusic]<yellow>切歌投票已被发起者取消";
         if (cancel1 == null)
             cancel1 = "<light_purple>[AllMusic]<yellow>歌曲结束，切歌投票终止";
+        if (cancel2 == null)
+            cancel2 = "<light_purple>[AllMusic]<yellow>已取消你发起的切歌投票";
         if (list == null)
             list = "<light_purple>[AllMusic]<yellow>剩余" + ARG.count + "个投票";
     }

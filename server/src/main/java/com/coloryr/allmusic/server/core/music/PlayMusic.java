@@ -130,7 +130,6 @@ public class PlayMusic {
         }
 
         voteList.add(vote);
-        voteTime = AllMusic.getConfig().vote.voteTime;
 
         return true;
     }
@@ -164,6 +163,9 @@ public class PlayMusic {
                     playList.add(0, obj);
                 }
                 AllMusic.side.broadcastInTask(AllMusic.getMessage().push.doPush);
+            } else {
+                // 投票期间这首歌被删了，别静默丢弃
+                AllMusic.side.broadcastInTask(AllMusic.getMessage().push.err4);
             }
         }
 
@@ -233,6 +235,12 @@ public class PlayMusic {
      */
     public static VoteItem nextVote() {
         vote = voteList.poll();
+        if (vote != null) {
+            // 计时要在真正开始（成为当前投票）时重置：
+            // 原来在 startVote 里重置，排队中的投票会沿用上一票剩下的时间，
+            // 而且运行中再发起新投票会把当前投票的时间也重置掉
+            voteTime = AllMusic.getConfig().vote.voteTime;
+        }
         return vote;
     }
 

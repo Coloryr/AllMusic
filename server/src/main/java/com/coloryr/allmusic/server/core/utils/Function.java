@@ -8,6 +8,23 @@ public class Function {
         return pattern.matcher(str).matches();
     }
 
+    /**
+     * 将字符串转为整数
+     *
+     * @param str 字符串
+     * @param def 无法转换时的默认值
+     * @return 结果
+     */
+    public static int getInt(String str, int def) {
+        if (str == null)
+            return def;
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            return def;
+        }
+    }
+
     public static String getString(String a, String b, String c) {
         int x = a.indexOf(b) + b.length();
         int y;

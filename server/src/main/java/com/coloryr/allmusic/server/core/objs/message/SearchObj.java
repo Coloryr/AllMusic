@@ -7,6 +7,7 @@ public class SearchObj {
     public String emptySearch;
     public String errorNum;
     public String choice;
+    public String select;
     public String cantNext;
     public String cantLast;
     public String startSearch;
@@ -41,6 +42,8 @@ public class SearchObj {
             return true;
         if (nextPage == null)
             return true;
+        if (select == null)
+            return true;
         return startSearch == null;
     }
 
@@ -59,6 +62,8 @@ public class SearchObj {
             errorNum = "<light_purple>[AllMusic]<red>请输入正确的序号";
         if (choice == null)
             choice = "<light_purple>[AllMusic]<yellow>你选择了序号：" + ARG.index;
+        if (select == null)
+            select = "<light_purple>[AllMusic]<dark_green>输入/music select [序号] 或 /music [序号] 选择搜索结果";
         if (cantNext == null)
             cantNext = "<light_purple>[AllMusic]<red>无法下一页";
         if (cantLast == null)

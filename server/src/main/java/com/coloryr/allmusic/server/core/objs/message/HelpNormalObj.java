@@ -133,7 +133,7 @@ public class HelpNormalObj {
         if (search == null)
             search = "<light_purple>[AllMusic]<yellow>/music search [歌名] 搜索歌曲";
         if (select == null)
-            select = "<light_purple>[AllMusic]<yellow>/music select [序列] 选择歌曲";
+            select = "<light_purple>[AllMusic]<yellow>/music [序号] 或 /music select [序号] 选择搜索结果";
         if (nextpage == null)
             nextpage = "<light_purple>[AllMusic]<yellow>/music nextpage 切换下一页歌曲搜索结果";
         if (lastpage == null)

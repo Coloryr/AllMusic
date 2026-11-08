@@ -61,7 +61,7 @@ public class AllMusic {
     /**
      * 语言文件配置版本号
      */
-    public static final String messageVersion = "402";
+    public static final String messageVersion = "403";
     /**
      * 日志
      */
@@ -128,9 +128,14 @@ public class AllMusic {
      * 检查语言文件完整性
      */
     private static void messageCheck() {
-        if (message == null || message.check()) {
+        if (message == null) {
             message = MessageObj.make();
             log.data("<light_purple>[AllMusic]<red>配置文件message.json错误，已覆盖");
+            saveMessage();
+        } else if (message.check()) {
+            // 保留已有内容，只补全缺失的字段
+            message.version = messageVersion;
+            log.data("<light_purple>[AllMusic]<yellow>配置文件message.json缺少内容，已补全");
             saveMessage();
         }
     }

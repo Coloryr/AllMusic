@@ -7,6 +7,7 @@ import com.coloryr.allmusic.server.core.music.MusicSearch;
 import com.coloryr.allmusic.server.core.music.PlayMusic;
 import com.coloryr.allmusic.server.core.objs.message.ARG;
 import com.coloryr.allmusic.server.core.objs.music.PlayerAddMusicObj;
+import com.coloryr.allmusic.server.core.objs.music.SearchPageObj;
 import com.coloryr.allmusic.server.core.saves.BanSave;
 import com.coloryr.allmusic.server.core.saves.SaveTask;
 
@@ -275,6 +276,10 @@ public class CommandEX {
                     return;
                 }
             }
+            // 搜歌后可以直接用 /music 序号 选择搜索结果
+            if (args.length == 1 && CommandSelect.selectSearch(sender, name, args[0])) {
+                return;
+            }
             if (AllMusic.getConfig().needPermission &&
                     !AllMusic.side.checkPermission(sender, PermissionList.PERMISSION_ADD_MUSIC))
                 AllMusic.side.sendMessage(sender, AllMusic.getMessage().command.noPer);
@@ -298,6 +303,25 @@ public class CommandEX {
     }
 
     /**
+     * 获取搜歌结果的补全列表
+     * <p>
+     * 包含搜歌相关的指令和当前页可以选择的序号
+     *
+     * @param name 用户名
+     * @return 补全列表
+     */
+    private static List<String> getSearchTabList(String name) {
+        List<String> list = new ArrayList<>(search);
+        SearchPageObj obj = MusicSearch.getSearch(name);
+        if (obj != null) {
+            for (int a = 1; a <= obj.getIndex(); a++) {
+                list.add(String.valueOf(a));
+            }
+        }
+        return list;
+    }
+
+    /**
      * 获取Tab指令列表
      *
      * @param name 用户名
@@ -312,7 +336,7 @@ public class CommandEX {
                 arguments.addAll(admin);
             }
             if (MusicSearch.getSearch(name) != null) {
-                return search;
+                return getSearchTabList(name);
             }
         } else {
             if (arg[0] == null || arg[0].isEmpty() || arg.length == 1) {
@@ -322,7 +346,7 @@ public class CommandEX {
                 }
                 if (arg[0] == null || arg[0].isEmpty()) {
                     if (MusicSearch.getSearch(name) != null) {
-                        return search;
+                        return getSearchTabList(name);
                     }
                 }
             } else {

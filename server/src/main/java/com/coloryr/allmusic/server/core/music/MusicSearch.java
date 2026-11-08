@@ -86,7 +86,11 @@ public class MusicSearch {
                     .replace(ARG.musicAuthor, TextUtils.escapeVar(item.author))
                     .replace(ARG.musicAl, TextUtils.escapeVar(item.al));
             AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(info)
-                    .append(AllMusic.side.clickRun(AllMusic.getMessage().click.clickRun, "/music select " + (a + 1))));
+                    .append(AllMusic.side.clickRun(AllMusic.getMessage().click.clickRun, "/music " + (a + 1))));
+        }
+        if (index > 0) {
+            AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().search.select)
+                    .append(AllMusic.side.clickSuggest(AllMusic.getMessage().click.clickCheck, "/music select ")));
         }
         if (search.haveNextPage()) {
             AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(AllMusic.getMessage().search.nextPage)

@@ -117,6 +117,7 @@ AllMusic不会内置音乐api，你想要正常使用需要自己安装
 | `/music search <歌名>` | 用默认API搜索歌曲 |
 | `/music searchapi <音乐API> <歌名>` | 指定API搜索歌曲 |
 | `/music select <序号>` | 选择搜索结果 |
+| `/music <序号>` | 搜索后直接按序号选择搜索结果，等同 `/music select <序号>` |
 | `/music nextpage` | 搜索结果下一页 |
 | `/music lastpage` | 搜索结果上一页 |
 | `/music join` | 重新接收当前正在播放的歌曲（重连/切服后使用） |

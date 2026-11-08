@@ -2,6 +2,7 @@ package com.coloryr.allmusic.server.core.objs.music;
 
 import com.coloryr.allmusic.server.core.AllMusic;
 import com.coloryr.allmusic.server.core.objs.message.ARG;
+import com.coloryr.allmusic.server.core.utils.TextUtils;
 
 public class SongInfoObj {
     /**
@@ -134,10 +135,10 @@ public class SongInfoObj {
 
     public String getInfo() {
         String info = AllMusic.getMessage().musicPlay.musicInfo;
-        info = info.replace(ARG.musicName, name == null ? "" : name)
-                .replace(ARG.musicAuthor, author == null ? "" : author)
-                .replace(ARG.musicAl, al == null ? "" : al)
-                .replace(ARG.musicAlia, alia == null ? "" : alia)
+        info = info.replace(ARG.musicName, TextUtils.escapeVar(name == null ? "" : name))
+                .replace(ARG.musicAuthor, TextUtils.escapeVar(author == null ? "" : author))
+                .replace(ARG.musicAl, TextUtils.escapeVar(al == null ? "" : al))
+                .replace(ARG.musicAlia, TextUtils.escapeVar(alia == null ? "" : alia))
                 .replace(ARG.player, call == null ? "" : call);
         return info;
     }

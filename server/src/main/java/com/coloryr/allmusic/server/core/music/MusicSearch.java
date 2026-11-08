@@ -6,6 +6,7 @@ import com.coloryr.allmusic.server.core.objs.SearchMusicObj;
 import com.coloryr.allmusic.server.core.objs.message.ARG;
 import com.coloryr.allmusic.server.core.objs.music.PlayerAddMusicObj;
 import com.coloryr.allmusic.server.core.objs.music.SearchPageObj;
+import com.coloryr.allmusic.server.core.utils.TextUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class MusicSearch {
                     SearchPageObj search = api.search(obj.args);
                     if (search == null)
                         AllMusic.side.sendMessageTask(obj.sender, AllMusic.getMessage().search
-                                .cantSearch.replace(ARG.name, obj.args[0]));
+                                .cantSearch.replace(ARG.name, TextUtils.escapeVar(obj.args[0])));
                     else {
                         AllMusic.side.sendMessageTask(obj.sender, AllMusic.getMessage().search.res);
                         addSearch(obj.name, search);
@@ -81,9 +82,9 @@ public class MusicSearch {
             item = search.getRes(a + search.getPage() * 10);
             info = AllMusic.getMessage().page.choice;
             info = info.replace(ARG.index, "" + (a + 1))
-                    .replace(ARG.musicName, item.name)
-                    .replace(ARG.musicAuthor, item.author)
-                    .replace(ARG.musicAl, item.al);
+                    .replace(ARG.musicName, TextUtils.escapeVar(item.name))
+                    .replace(ARG.musicAuthor, TextUtils.escapeVar(item.author))
+                    .replace(ARG.musicAl, TextUtils.escapeVar(item.al));
             AllMusic.side.sendMessage(sender, AllMusic.side.miniMessage(info)
                     .append(AllMusic.side.clickRun(AllMusic.getMessage().click.clickRun, "/music select " + (a + 1))));
         }

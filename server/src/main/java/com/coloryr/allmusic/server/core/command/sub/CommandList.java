@@ -4,6 +4,7 @@ import com.coloryr.allmusic.server.core.AllMusic;
 import com.coloryr.allmusic.server.core.command.ACommand;
 import com.coloryr.allmusic.server.core.music.PlayMusic;
 import com.coloryr.allmusic.server.core.objs.message.ARG;
+import com.coloryr.allmusic.server.core.utils.TextUtils;
 
 public class CommandList extends ACommand {
     @Override
@@ -12,10 +13,10 @@ public class CommandList extends ACommand {
             AllMusic.side.sendMessage(sender, AllMusic.getMessage().musicPlay.emptyPlayingMusic);
         } else {
             String info = AllMusic.getMessage().musicPlay.nowPlay;
-            info = info.replace(ARG.musicName, PlayMusic.nowPlayMusic.getName())
-                    .replace(ARG.musicAuthor, PlayMusic.nowPlayMusic.getAuthor())
-                    .replace(ARG.musicAl, PlayMusic.nowPlayMusic.getAl())
-                    .replace(ARG.musicAlia, PlayMusic.nowPlayMusic.getAlia())
+            info = info.replace(ARG.musicName, TextUtils.escapeVar(PlayMusic.nowPlayMusic.getName()))
+                    .replace(ARG.musicAuthor, TextUtils.escapeVar(PlayMusic.nowPlayMusic.getAuthor()))
+                    .replace(ARG.musicAl, TextUtils.escapeVar(PlayMusic.nowPlayMusic.getAl()))
+                    .replace(ARG.musicAlia, TextUtils.escapeVar(PlayMusic.nowPlayMusic.getAlia()))
                     .replace(ARG.player, PlayMusic.nowPlayMusic.getCall());
             AllMusic.side.sendMessage(sender, info);
         }

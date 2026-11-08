@@ -137,10 +137,10 @@ public class HudUtils {
             info = AllMusic.getMessage().hud.emptyMusic;
         } else {
             info = AllMusic.getMessage().hud.music
-                    .replace(ARG.name, infoLimit(PlayMusic.nowPlayMusic.getName()))
-                    .replace(ARG.musicAuthor, infoLimit(PlayMusic.nowPlayMusic.getAuthor()))
-                    .replace(ARG.musicAlia, infoLimit(PlayMusic.nowPlayMusic.getAlia()))
-                    .replace(ARG.musicAl, infoLimit(PlayMusic.nowPlayMusic.getAl()))
+                    .replace(ARG.name, TextUtils.escapeVar(infoLimit(PlayMusic.nowPlayMusic.getName())))
+                    .replace(ARG.musicAuthor, TextUtils.escapeVar(infoLimit(PlayMusic.nowPlayMusic.getAuthor())))
+                    .replace(ARG.musicAlia, TextUtils.escapeVar(infoLimit(PlayMusic.nowPlayMusic.getAlia())))
+                    .replace(ARG.musicAl, TextUtils.escapeVar(infoLimit(PlayMusic.nowPlayMusic.getAl())))
                     .replace(ARG.player, PlayMusic.nowPlayMusic.getCall());
         }
 
@@ -168,11 +168,11 @@ public class HudUtils {
             String lyric = obj.getLyric();
             String tLyric = obj.getTlyric();
             lyr = AllMusic.getMessage().hud.lyric
-                    .replace(ARG.lyric, lyric == null ? "" : lyric);
+                    .replace(ARG.lyric, TextUtils.escapeVar(lyric == null ? "" : lyric));
             tran = AllMusic.getMessage().hud.tlyric
-                    .replace(ARG.lyric, tLyric == null ? "" : tLyric);
+                    .replace(ARG.lyric, TextUtils.escapeVar(tLyric == null ? "" : tLyric));
             ktv = AllMusic.getMessage().hud.klyric
-                    .replace(ARG.lyric, lyric == null ? "" : lyric);
+                    .replace(ARG.lyric, TextUtils.escapeVar(lyric == null ? "" : lyric));
         }
 
         AllMusic.side.sendHudLyric(new MusicPack.LyricMusicPack(lyr, tran, ktv));

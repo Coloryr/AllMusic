@@ -9,6 +9,7 @@ import com.coloryr.allmusic.server.core.objs.music.PlayerAddMusicObj;
 import com.coloryr.allmusic.server.core.objs.music.SongInfoObj;
 import com.coloryr.allmusic.server.core.saves.MusicListSave;
 import com.coloryr.allmusic.server.core.utils.HudUtils;
+import com.coloryr.allmusic.server.core.utils.TextUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -314,18 +315,18 @@ public class PlayMusic {
             if (!AllMusic.getConfig().muteAddMessage) {
                 if (AllMusic.getConfig().showInBar) {
                     String data = AllMusic.getMessage().musicPlay.addMusic
-                            .replace(ARG.musicName, HudUtils.messageLimit(info.getName()))
-                            .replace(ARG.musicAuthor, HudUtils.messageLimit(info.getAuthor()))
-                            .replace(ARG.musicAl, HudUtils.messageLimit(info.getAl()))
-                            .replace(ARG.musicAlia, HudUtils.messageLimit(info.getAlia()))
+                            .replace(ARG.musicName, TextUtils.escapeVar(HudUtils.messageLimit(info.getName())))
+                            .replace(ARG.musicAuthor, TextUtils.escapeVar(HudUtils.messageLimit(info.getAuthor())))
+                            .replace(ARG.musicAl, TextUtils.escapeVar(HudUtils.messageLimit(info.getAl())))
+                            .replace(ARG.musicAlia, TextUtils.escapeVar(HudUtils.messageLimit(info.getAlia())))
                             .replace(ARG.player, info.getCall());
                     AllMusic.side.sendBarInTask(data);
                 } else {
                     String data = AllMusic.getMessage().musicPlay.addMusic
-                            .replace(ARG.musicName, info.getName())
-                            .replace(ARG.musicAuthor, info.getAuthor())
-                            .replace(ARG.musicAl, info.getAl())
-                            .replace(ARG.musicAlia, info.getAlia())
+                            .replace(ARG.musicName, TextUtils.escapeVar(info.getName()))
+                            .replace(ARG.musicAuthor, TextUtils.escapeVar(info.getAuthor()))
+                            .replace(ARG.musicAl, TextUtils.escapeVar(info.getAl()))
+                            .replace(ARG.musicAlia, TextUtils.escapeVar(info.getAlia()))
                             .replace(ARG.player, info.getCall());
                     AllMusic.side.broadcastInTask(data);
                 }
@@ -415,10 +416,10 @@ public class PlayMusic {
             info = playList.get(i);
             a = AllMusic.getMessage().musicPlay.listMusic.item;
             a = a.replace(ARG.index, String.valueOf(i + 1))
-                    .replace(ARG.musicName, info.getName())
-                    .replace(ARG.musicAuthor, info.getAuthor())
-                    .replace(ARG.musicAl, info.getAl())
-                    .replace(ARG.musicAlia, info.getAlia())
+                    .replace(ARG.musicName, TextUtils.escapeVar(info.getName()))
+                    .replace(ARG.musicAuthor, TextUtils.escapeVar(info.getAuthor()))
+                    .replace(ARG.musicAl, TextUtils.escapeVar(info.getAl()))
+                    .replace(ARG.musicAlia, TextUtils.escapeVar(info.getAlia()))
                     .replace(ARG.player, info.getCall());
             list.append(a).append("\n");
         }

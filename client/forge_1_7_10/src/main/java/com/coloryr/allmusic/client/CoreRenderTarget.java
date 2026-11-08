@@ -6,10 +6,8 @@ import com.coloryr.allmusic.client.core.render.TextFrameBuffer;
 import com.coloryr.allmusic.codec.HudPosType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CoreRenderTarget extends TextFrameBuffer<String> {
     private final boolean isState;
@@ -40,32 +38,35 @@ public class CoreRenderTarget extends TextFrameBuffer<String> {
             return;
         }
 
-        FontRenderer font = Minecraft.getMinecraft().fontRenderer;
+        // 文字绘制会改纹理、混合、Alpha 测试和颜色，画完还原 GL 状态机
+        try (GlState ignored = GlState.push()) {
+            FontRenderer font = Minecraft.getMinecraft().fontRenderer;
 
-        for (TextItem<String> entry : texts) {
-            int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
-            Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
+            for (TextItem<String> entry : texts) {
+                int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
+                Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
 
-            int drawX = (int) point.x;
-            int drawY = (int) (point.y + entry.y);
-            int finalColor = applyAlpha(entry.color, alpha);
+                int drawX = (int) point.x;
+                int drawY = (int) (point.y + entry.y);
+                int finalColor = applyAlpha(entry.color, alpha);
 
-            GL11.glPushMatrix();
-            GL11.glTranslatef(drawX, drawY, 0);
+                GL11.glPushMatrix();
+                GL11.glTranslatef(drawX, drawY, 0);
 
-            if (maxWidth != -1 && entry.width > maxWidth) {
-                int scrollOffset = (int) getOffset(entry, maxWidth);
-                enableScissor(drawX, drawY, maxWidth, entry.height);
-                drawString(font, entry, -scrollOffset, 0, finalColor);
-                if (scrollOffset > 0) {
-                    drawString(font, entry, -scrollOffset + entry.width, 0, finalColor);
+                if (maxWidth != -1 && entry.width > maxWidth) {
+                    int scrollOffset = (int) getOffset(entry, maxWidth);
+                    enableScissor(drawX, drawY, maxWidth, entry.height);
+                    drawString(font, entry, -scrollOffset, 0, finalColor);
+                    if (scrollOffset > 0) {
+                        drawString(font, entry, -scrollOffset + entry.width, 0, finalColor);
+                    }
+                    disableScissor();
+                } else {
+                    drawString(font, entry, 0, 0, finalColor);
                 }
-                disableScissor();
-            } else {
-                drawString(font, entry, 0, 0, finalColor);
-            }
 
-            GL11.glPopMatrix();
+                GL11.glPopMatrix();
+            }
         }
     }
 
@@ -77,12 +78,15 @@ public class CoreRenderTarget extends TextFrameBuffer<String> {
         if (line >= texts.size()) {
             return;
         }
-        TextItem<String> entry = texts.get(line);
-        FontRenderer font = Minecraft.getMinecraft().fontRenderer;
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float) x, (float) (y + entry.y), 0);
-        drawString(font, entry, 0, 0, applyAlpha(entry.color, alpha));
-        GL11.glPopMatrix();
+
+        try (GlState ignored = GlState.push()) {
+            TextItem<String> entry = texts.get(line);
+            FontRenderer font = Minecraft.getMinecraft().fontRenderer;
+            GL11.glPushMatrix();
+            GL11.glTranslatef(x, y + entry.y, 0);
+            drawString(font, entry, 0, 0, applyAlpha(entry.color, alpha));
+            GL11.glPopMatrix();
+        }
     }
 
     @Override
@@ -90,35 +94,38 @@ public class CoreRenderTarget extends TextFrameBuffer<String> {
         if (texts.isEmpty()) {
             return;
         }
-        FontRenderer font = Minecraft.getMinecraft().fontRenderer;
 
-        for (TextItem<String> entry : texts) {
-            int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
-            Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
+        try (GlState ignored = GlState.push()) {
+            FontRenderer font = Minecraft.getMinecraft().fontRenderer;
 
-            int drawX = (int) point.x;
-            int drawY = (int) (point.y + entry.y);
-            int finalColor = applyAlpha(entry.color, alpha);
+            for (TextItem<String> entry : texts) {
+                int displayWidth = maxWidth != -1 ? Math.min(entry.width, maxWidth) : entry.width;
+                Point2f point = AllMusicHud.getPos(displayWidth, entry.height, x, y, dir);
 
-            GL11.glPushMatrix();
-            GL11.glTranslatef(drawX, drawY, 0);
+                int drawX = (int) point.x;
+                int drawY = (int) (point.y + entry.y);
+                int finalColor = applyAlpha(entry.color, alpha);
 
-            if (maxWidth != -1 && entry.width > maxWidth) {
-                float maxOffset = entry.width - maxWidth;
-                float texOffset = maxOffset * state;
-                int revealWidth = (int) (maxWidth * state);
+                GL11.glPushMatrix();
+                GL11.glTranslatef(drawX, drawY, 0);
 
-                enableScissor(drawX, drawY, revealWidth, entry.height);
-                drawString(font, entry, -(int) texOffset, 0, finalColor);
-                disableScissor();
-            } else {
-                int revealWidth = (int) (entry.width * state);
-                enableScissor(drawX, drawY, revealWidth, entry.height);
-                drawString(font, entry, 0, 0, finalColor);
-                disableScissor();
+                if (maxWidth != -1 && entry.width > maxWidth) {
+                    float maxOffset = entry.width - maxWidth;
+                    float texOffset = maxOffset * state;
+                    int revealWidth = (int) (maxWidth * state);
+
+                    enableScissor(drawX, drawY, revealWidth, entry.height);
+                    drawString(font, entry, -(int) texOffset, 0, finalColor);
+                    disableScissor();
+                } else {
+                    int revealWidth = (int) (entry.width * state);
+                    enableScissor(drawX, drawY, revealWidth, entry.height);
+                    drawString(font, entry, 0, 0, finalColor);
+                    disableScissor();
+                }
+
+                GL11.glPopMatrix();
             }
-
-            GL11.glPopMatrix();
         }
     }
 
@@ -141,11 +148,9 @@ public class CoreRenderTarget extends TextFrameBuffer<String> {
 
     private static void enableScissor(int x, int y, int width, int height) {
         Minecraft mc = Minecraft.getMinecraft();
-        int scale = mc.gameSettings.guiScale;
-        if (scale == 0) {
-            int k = Math.min(mc.displayWidth, mc.displayHeight);
-            scale = Math.max(1, k / 320);
-        }
+        // 用 ScaledResolution 的缩放系数，自动 GUI 缩放时才能和文字坐标对齐
+        ScaledResolution resolution = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+        int scale = resolution.getScaleFactor();
         int sx = x * scale;
         int sy = mc.displayHeight - (y + height) * scale;
         int sw = width * scale;

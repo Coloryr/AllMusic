@@ -318,7 +318,10 @@ public class AllMusic implements AllMusicBridge {
     @SideOnly(Side.CLIENT)
     public void onRenderOverlay(final RenderGameOverlayEvent.Pre e) {
         if (e.type == RenderGameOverlayEvent.ElementType.PORTAL) {
-            AllMusicCore.hudUpdate();
+            // HUD 绘制会改动 GL 状态机，画完必须还原，避免影响原版后续的 HUD / 界面渲染
+            try (GlState ignored = GlState.push()) {
+                AllMusicCore.hudUpdate();
+            }
         }
     }
 
